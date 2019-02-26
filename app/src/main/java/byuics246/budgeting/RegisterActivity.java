@@ -1,0 +1,18 @@
+package byuics246.budgeting;
+
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+
+public class RegisterActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_register);
+
+
+        // Hopefully you guys see this comment
+
+        // I see the comment. Thanks again Cameron ~Cody
+    }
+}
