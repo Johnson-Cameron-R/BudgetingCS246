@@ -24,7 +24,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.068" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <EditText
         android:id="@+id/editTextRegisterFirstName"
@@ -43,7 +43,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewRegisterTitle"
-        app:layout_constraintVertical_bias="0.031" />
+        app:layout_constraintVertical_bias="0.008" />
 
     <EditText
         android:id="@+id/editTextRegisterLastName"
@@ -156,7 +156,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextRegisterRepeatPassword"
-        app:layout_constraintVertical_bias="0.1" />
+        app:layout_constraintVertical_bias="0.064" />
 
     <Button
         android:id="@+id/buttonRegisterSubmit"
@@ -176,7 +176,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextRegisterFamilyID"
-        app:layout_constraintVertical_bias="0.216" />
+        app:layout_constraintVertical_bias="0.111" />
 
     <TextView
         android:id="@+id/textViewRegisterEmailNotice"
@@ -192,7 +192,8 @@
         android:textColor="@color/colorBlack"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.48"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonRegisterSubmit"
-        app:layout_constraintVertical_bias="0.8" />
+        app:layout_constraintVertical_bias="0.41" />
 </android.support.constraint.ConstraintLayout>
