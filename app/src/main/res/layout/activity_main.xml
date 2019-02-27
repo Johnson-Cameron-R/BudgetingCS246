@@ -9,7 +9,7 @@
     <TextView
         android:id="@+id/textViewSignInTitle"
         android:layout_width="277dp"
-        android:layout_height="84dp"
+        android:layout_height="57dp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
@@ -17,17 +17,18 @@
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:text="Simple Budgeting"
-        android:textSize="32sp"
         android:textAlignment="center"
+        android:textColor="@color/colorBlack"
+        android:textSize="32sp"
         app:layout_constraintBottom_toTopOf="@+id/editTextSignInUsername"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.65999997" />
+        app:layout_constraintVertical_bias="0.456" />
 
     <EditText
         android:id="@+id/editTextSignInUsername"
-        android:layout_width="wrap_content"
+        android:layout_width="257dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
@@ -42,11 +43,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintVertical_bias="0.975" />
 
     <EditText
         android:id="@+id/editTextSignInPassword"
-        android:layout_width="wrap_content"
+        android:layout_width="257dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
@@ -61,7 +62,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.915" />
+        app:layout_constraintVertical_bias="0.963" />
 
     <CheckBox
         android:id="@+id/checkBoxSignInSaveUser"
@@ -74,12 +75,13 @@
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:text="Save Username"
+        android:textColor="@color/colorBlack"
         app:layout_constraintBottom_toTopOf="@+id/buttonSignInLogin"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.343"
+        app:layout_constraintHorizontal_bias="0.26"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.913" />
+        app:layout_constraintVertical_bias="0.812" />
 
     <Button
         android:id="@+id/buttonSignInLogin"
@@ -91,7 +93,9 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
+        android:background="@color/ButtonsBackground"
         android:text="Login"
+        android:textColor="@color/ButtonsText"
         app:layout_constraintBottom_toTopOf="@+id/buttonSignInRegister"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.501"
@@ -109,13 +113,15 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
+        android:background="@color/ButtonsBackground"
         android:text="Register"
+        android:textColor="@color/ButtonsText"
         app:layout_constraintBottom_toTopOf="@+id/textViewSignInForgotPassword"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.9" />
+        app:layout_constraintVertical_bias="0.941" />
 
     <TextView
         android:id="@+id/textViewSignInForgotPassword"
@@ -127,15 +133,16 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
+        android:clickable="true"
+        android:focusable="true"
         android:text="Forgot Password / Username"
         android:textAlignment="center"
-        android:clickable="true"
+        android:textColor="@color/colorBlack"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.843"
-        android:focusable="true" />
+        app:layout_constraintVertical_bias="0.879" />
 
 </android.support.constraint.ConstraintLayout>
