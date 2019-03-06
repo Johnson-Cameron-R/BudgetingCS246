@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "784925785695-rcobhd4sbl1743eh5d9i5iajhqht45b9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "byuics246.budgeting",
+            "certificate_hash": "92052788735c2f3f278d784545233c09a2cb2b04"
+          }
+        },
+        {
           "client_id": "784925785695-l2le3a083ivmhpudqctnnt5ne8rhg3n0.apps.googleusercontent.com",
           "client_type": 3
         }
