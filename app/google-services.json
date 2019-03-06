@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "784925785695",
+    "firebase_url": "https://budgetingcs246.firebaseio.com",
+    "project_id": "budgetingcs246",
+    "storage_bucket": "budgetingcs246.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:784925785695:android:d431b1ca3f114b50",
+        "android_client_info": {
+          "package_name": "byuics246.budgeting"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "784925785695-atv3velrvjaqpkrbm9uqkp6h26qe81iu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "byuics246.budgeting",
+            "certificate_hash": "29650687ec89cc45cb64deb88610f1d4270d3eb1"
+          }
+        },
+        {
+          "client_id": "784925785695-l2le3a083ivmhpudqctnnt5ne8rhg3n0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDydisBko4-JUFhglDTrzuPccVQcqwPaYE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "784925785695-l2le3a083ivmhpudqctnnt5ne8rhg3n0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
