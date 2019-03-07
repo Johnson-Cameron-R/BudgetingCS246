@@ -5,7 +5,7 @@ public class Expense {
     String user;
     String description;
     String category;
-    double amount;
+    String amount;//or double
 
     public String getDate() {
         return date;
@@ -39,15 +39,15 @@ public class Expense {
         this.category = category;
     }
 
-    public double getAmount() {
+    public String getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(String amount) {
         this.amount = amount;
     }
 
-    public Expense(String date, String user, String category, double amount) {
+    public Expense(String date, String user, String category, String amount) {
         this.date = date;
         this.user = user;
         this.category = category;

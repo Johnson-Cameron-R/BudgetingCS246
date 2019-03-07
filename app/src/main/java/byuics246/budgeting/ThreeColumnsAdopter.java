@@ -52,7 +52,7 @@ class ThreeColumnsAdapter extends ArrayAdapter<Expense> {
             first +=1;
         }
         String category = getItem(position).getCategory();
-        double amount = getItem(position). getAmount();
+        String amount = getItem(position). getAmount();
         String user = getItem(position). getUser();
         String description = getItem(position). getDescription();
 
