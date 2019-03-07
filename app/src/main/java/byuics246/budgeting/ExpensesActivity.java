@@ -45,7 +45,7 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
         listView = (ListView) findViewById(R.id.listViewExpensesHistory);
         listExpenses = new ArrayList<>();
         Expense example = new Expense("03/05/2019", "Inessa", "food", "100.00");//////////////////////////////////
-//        Expense example2 = new Expense("03/05/2019", "Inessa", "food", "100.00");//////////////////////////////////
+//        Expense example2 = new Expense("03/05/2019", "Inessa", "food", "100.00");/////////////////////////////////////////////////////////
 //        listExpenses.add(example2);
         listExpenses.add(example);
         expensesHistoryAdapter = new ThreeColumnsAdapter(this, R.layout.three_columns_history_layout, listExpenses);
@@ -85,7 +85,7 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     public void addToList(View view) {
 
 
-        Expense example2 = new Expense(newDate.getText().toString(), "Inessa", category, newAmount.getText().toString());
+        Expense example2 = new Expense(newDate.getText().toString(), "Inessa", category, newAmount.getText().toString());////////////////////
         example2.setDescription(newDescription.getText().toString());
         expensesHistoryAdapter.add(example2);
 
