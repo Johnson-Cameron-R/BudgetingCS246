@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Budgetingcs246</string>
+    <string-array name = "Categories">
+        <item>Category</item>
+        <item>Grocieries</item>
+        <item>Gas</item>
+    </string-array>"
+
 </resources>
