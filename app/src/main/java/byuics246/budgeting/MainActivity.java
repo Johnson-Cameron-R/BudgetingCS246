@@ -156,7 +156,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         int i = v.getId();
         if (i == R.id.buttonSignInRegister) {
-            createAccount(mEmailField.getText().toString(), mPasswordField.getText().toString());
+            openRegisterPage();
+            //            createAccount(mEmailField.getText().toString(), mPasswordField.getText().toString());
         } else if (i == R.id.buttonSignInLogin) {
             signIn(mEmailField.getText().toString(), mPasswordField.getText().toString());
 //        } else if (i == R.id.signOutButton) {
