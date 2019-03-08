@@ -1,5 +1,6 @@
 package byuics246.budgeting;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -73,6 +74,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                             Log.d(TAG, "createUserWithEmail:success");
                             db.collection("UserInfo").document(email).set(buildUser());
                             FirebaseUser user = mAuth.getCurrentUser();
+                            Intent openExpensesActivity = new Intent(getApplicationContext(), ExpensesActivity.class);
+                            startActivity(openExpensesActivity);
 //                            updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
