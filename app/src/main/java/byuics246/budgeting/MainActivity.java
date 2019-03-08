@@ -1,12 +1,14 @@
 package byuics246.budgeting;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +27,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView mDetailTextView;
     private EditText mEmailField;
     private EditText mPasswordField;
+    private CheckBox saveLoginCheckBox;
+    private SharedPreferences loginPreferences;
+    private SharedPreferences.Editor loginPrefsEditor;
+    private Boolean saveLogin;
 
     // [Start declare_auth]
     private FirebaseAuth mAuth;
@@ -39,6 +45,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // Views
         mEmailField = findViewById(R.id.editTextSignInUsername);
+        saveLoginCheckBox = findViewById(R.id.checkBoxSignInSaveUser);
+        loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        loginPrefsEditor = loginPreferences.edit();
+        saveLogin = loginPreferences.getBoolean("saveLogin", false);
+        if (saveLogin == true) {
+            mEmailField.setText(loginPreferences.getString("email", ""));
+            mPasswordField.setText(loginPreferences.getString("password", ""));
+            saveLoginCheckBox.setChecked(true);
+        }
         // Buttons
         findViewById(R.id.buttonSignInLogin).setOnClickListener(this);
         findViewById(R.id.buttonSignInRegister).setOnClickListener(this);
@@ -87,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // [END create_user_with_email]
     }
 
-    private void signIn(String email, String password) {
+    private void signIn(final String email, final String password) {
         Log.d(TAG, "signIn:" + email);
         if (!validateForm()) {
             return;
@@ -102,7 +117,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
+                            saveLoginInfo(email, password);
                             updateUI(user);
+                            Intent openExpensesActivity = new Intent(getApplicationContext(), ExpensesActivity.class);
+                            startActivity(openExpensesActivity);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
@@ -114,6 +132,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         // ...
                     }
                 });
+    }
+
+    private void saveLoginInfo(String email, String password) {
+        if (saveLoginCheckBox.isChecked()) {
+            loginPrefsEditor.putBoolean("saveLogin", true);
+            loginPrefsEditor.putString("email", email);
+            loginPrefsEditor.putString("password", password);
+            loginPrefsEditor.commit();
+        } else {
+            loginPrefsEditor.clear();
+            loginPrefsEditor.commit();
+        }
+
     }
 
     private void signOut() {
