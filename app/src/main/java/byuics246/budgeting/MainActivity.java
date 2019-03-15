@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private SharedPreferences.Editor loginPrefsEditor;
     private Boolean saveLogin;
 
+
     // [Start declare_auth]
     private FirebaseAuth mAuth;
     // [End declare_auth]
@@ -61,6 +62,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Buttons
         findViewById(R.id.buttonSignInLogin).setOnClickListener(this);
         findViewById(R.id.buttonSignInRegister).setOnClickListener(this);
+
+        //reset password
+        findViewById(R.id.textViewSignInForgotPassword).setOnClickListener(this);
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
@@ -92,12 +96,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
-//                            FirebaseUser user = mAuth.getCurrentUser();
-                            saveLoginInfo(email, password, name);
-                            // send user to expense page after login
-                            Log.d(TAG, "saved credentials, sending to expense page");
-                            Intent openExpensesActivity = new Intent(getApplicationContext(), ExpensesActivity.class);
-                            startActivity(openExpensesActivity);
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            assert user != null;
+                            if (user.isEmailVerified()) {
+                                Log.d(TAG, "Email is verified.");
+                                saveLoginInfo(email, password, name);
+                                // send user to expense page after login
+                                Log.d(TAG, "saved credentials, sending to expense page");
+                                Intent openExpensesActivity = new Intent(getApplicationContext(), ExpensesActivity.class);
+                                startActivity(openExpensesActivity);
+                            } else {
+                                Log.d(TAG, "Email is not verified !.");
+                            }
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
@@ -125,6 +135,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //    private void signOut() {
 //        mAuth.signOut();
 //    }
+
+    public void resetPassword() {
+        if (!validatePasswordReset()) {
+            Log.d(TAG, "FormNotValid");
+            return;
+        }
+
+        mAuth.sendPasswordResetEmail(mEmailField.getText().toString())
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "Email sent.");
+                        }
+                    }
+                });
+    }
+
+    private boolean validatePasswordReset() {
+        boolean valid = true;
+
+        String email = mEmailField.getText().toString();
+        if (TextUtils.isEmpty(email)) {
+            mEmailField.setError("Required.");
+            valid = false;
+        } else {
+            mEmailField.setError(null);
+        }
+
+        return valid;
+    }
 
     public void openRegisterPage() {
         Intent registerIntent = new Intent(this, RegisterActivity.class);
@@ -168,6 +209,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             openRegisterPage();
         } else if (i == R.id.buttonSignInLogin) {
             signIn(mEmailField.getText().toString(), mPasswordField.getText().toString(), mNameField.getText().toString());
+        } else if (i == R.id.textViewSignInForgotPassword) {
+            resetPassword();
 //        } else if (i == R.id.signOutButton) {
 //            signOut();
           }

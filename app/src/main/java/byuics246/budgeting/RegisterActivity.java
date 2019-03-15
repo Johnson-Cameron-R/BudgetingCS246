@@ -1,13 +1,13 @@
 package byuics246.budgeting;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -25,17 +25,15 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     private static final String TAG = "Register";
 
-    private EditText mFirstName;
-    private EditText mLastName;
     private EditText mEmail;
     private EditText mPassword;
     private EditText mPassword2;
-    private CheckBox mFamilyCheck;
-    private EditText mFamilyID;
+
+    private SharedPreferences loginPreferences;
+    private SharedPreferences.Editor loginPrefsEditor;
 
     // [Start Firebase declare]
     private FirebaseAuth mAuth;
-    private FirebaseFirestore db;
     // [End Firebase declare]
 
     @Override
@@ -43,22 +41,20 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        mFirstName   = findViewById(R.id.editTextRegisterFirstName);
-        mLastName    = findViewById(R.id.editTextRegisterLastName);
         mEmail       = findViewById(R.id.editTextRegisterEmail);
         mPassword    = findViewById(R.id.editTextRegisterPassword);
         mPassword2   = findViewById(R.id.editTextRegisterRepeatPassword);
-        mFamilyCheck = findViewById(R.id.checkBoxRegisterExistingFamily);
-        mFamilyID    = findViewById(R.id.editTextRegisterFamilyID);
+
+        loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        loginPrefsEditor = loginPreferences.edit();
 
         findViewById(R.id.buttonRegisterSubmit).setOnClickListener(this);
 
         // Initialize Firebase
         mAuth = FirebaseAuth.getInstance();
-        db    = FirebaseFirestore.getInstance();
     }
 
-    private void createAccount(final String email, String password) {
+    private void createAccount(final String email, final String password) {
         Log.d(TAG, "createAccount:" + email);
         if (!validateForm()) {
             return;
@@ -72,24 +68,41 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
-                            db.collection("UserInfo").document(email).set(buildUser());
+//                            db.collection("UserInfo").document(email).set(buildUser());
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Intent openExpensesActivity = new Intent(getApplicationContext(), ExpensesActivity.class);
-                            startActivity(openExpensesActivity);
-//                            updateUI(user);
+                            assert user != null;
+                            user.sendEmailVerification()
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                Log.d(TAG, "Email verification sent.");
+                                            }
+                                        }
+                                    });
+                            saveLoginInfo(email, password);
+                            Intent openSignInActivity = new Intent(getApplicationContext(), MainActivity.class);
+                            startActivity(openSignInActivity);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
                             mEmail.setError("Email In Use");
                             Toast.makeText(RegisterActivity.this, "Email is already associated with an account.",
                                     Toast.LENGTH_SHORT).show();
-//                            updateUI(null);
                         }
 
                         // ...
                     }
                 });
         // [END create_user_with_email]
+    }
+
+    private void saveLoginInfo(String email, String password) {
+            loginPrefsEditor.clear();
+            loginPrefsEditor.putBoolean("saveLogin", true);
+            loginPrefsEditor.putString("email", email);
+            loginPrefsEditor.putString("password", password);
+            loginPrefsEditor.commit();
     }
 
     @Override
@@ -106,35 +119,17 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 .matches();
     }
 
-    private Map<String, Object> buildUser() {
-        Map<String, Object> user = new HashMap<>();
-        user.put("FirstName", mFirstName.getText().toString());
-        user.put("LastName", mLastName.getText().toString());
-        user.put("FamilyID", mFamilyID.getText().toString());
-
-        return user;
-    }
+//    private Map<String, Object> buildUser() {
+//        Map<String, Object> user = new HashMap<>();
+//        user.put("FirstName", mFirstName.getText().toString());
+//        user.put("LastName", mLastName.getText().toString());
+//        user.put("FamilyID", mFamilyID.getText().toString());
+//
+//        return user;
+//    }
 
     private boolean validateForm() {
         boolean valid = true;
-
-        //Check if firstname is empty
-        String FirstName = mFirstName.getText().toString();
-        if (TextUtils.isEmpty(FirstName)) {
-            mFirstName.setError("Required.");
-            valid = false;
-        } else {
-            mFirstName.setError(null);
-        }
-
-        //Check if Lastname is empty
-        String LastName = mLastName.getText().toString();
-        if (TextUtils.isEmpty(LastName)) {
-            mLastName.setError("Required.");
-            valid = false;
-        } else {
-            mLastName.setError(null);
-        }
 
         //Check if Email is empty
         String email = mEmail.getText().toString();
