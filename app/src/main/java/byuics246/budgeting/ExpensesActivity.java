@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import byuics246.budgeting.ThreeColumnsAdapter;
+
 public class ExpensesActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     ExpandableRelativeLayout expandableRelativeLayout;
 

@@ -10,7 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.TextView;
+//import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -23,10 +23,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String TAG = "Main";
 
-    private TextView mStatusTextView;
-    private TextView mDetailTextView;
+//    Planning to use with a modal pop up for notifying the user if they logged in
+//    private TextView mStatusTextView;
+//    private TextView mDetailTextView;
+
     private EditText mEmailField;
     private EditText mPasswordField;
+    private EditText mNameField;
     private CheckBox saveLoginCheckBox;
     private SharedPreferences loginPreferences;
     private SharedPreferences.Editor loginPrefsEditor;
@@ -42,16 +45,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         mPasswordField = findViewById(R.id.editTextSignInPassword);
-
-        // Views
         mEmailField = findViewById(R.id.editTextSignInUsername);
+        mNameField = findViewById(R.id.editTextSignInDisplayName);
         saveLoginCheckBox = findViewById(R.id.checkBoxSignInSaveUser);
+
         loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
         loginPrefsEditor = loginPreferences.edit();
         saveLogin = loginPreferences.getBoolean("saveLogin", false);
         if (saveLogin == true) {
             mEmailField.setText(loginPreferences.getString("email", ""));
             mPasswordField.setText(loginPreferences.getString("password", ""));
+            mNameField.setText(loginPreferences.getString("name", ""));
             saveLoginCheckBox.setChecked(true);
         }
         // Buttons
@@ -62,21 +66,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mAuth = FirebaseAuth.getInstance();
     }
 
-    //     [START on_start_check_user]
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        //updateUI(currentUser);
-    }
+    //     OnStart event
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//        // Check if user is signed in (non-null) and update UI accordingly.
+////        FirebaseUser currentUser = mAuth.getCurrentUser();
+//        //updateUI(currentUser);
+//    }
     //     [END on_start_check_user]
 
-    private void signIn(final String email, final String password) {
+    private void signIn(final String email, final String password, final String name) {
         Log.d(TAG, "signIn:" + email);
         if (!validateForm()) {
+            Log.d(TAG, "FormNotValid");
             return;
         }
+        Log.d(TAG, "FormValid");
 
         // [START sign_in_with_email]
         mAuth.signInWithEmailAndPassword(email, password)
@@ -86,9 +92,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            saveLoginInfo(email, password);
-                            updateUI(user);
+//                            FirebaseUser user = mAuth.getCurrentUser();
+                            saveLoginInfo(email, password, name);
+                            // send user to expense page after login
+                            Log.d(TAG, "saved credentials, sending to expense page");
                             Intent openExpensesActivity = new Intent(getApplicationContext(), ExpensesActivity.class);
                             startActivity(openExpensesActivity);
                         } else {
@@ -96,19 +103,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
                             Toast.makeText(MainActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
-                            updateUI(null);
                         }
-
-                        // ...
                     }
                 });
     }
 
-    private void saveLoginInfo(String email, String password) {
+    private void saveLoginInfo(String email, String password, String name) {
         if (saveLoginCheckBox.isChecked()) {
             loginPrefsEditor.putBoolean("saveLogin", true);
             loginPrefsEditor.putString("email", email);
             loginPrefsEditor.putString("password", password);
+            loginPrefsEditor.putString("name", name);
             loginPrefsEditor.commit();
         } else {
             loginPrefsEditor.clear();
@@ -117,18 +122,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void signOut() {
-        mAuth.signOut();
-        updateUI(null);
-    }
+//    private void signOut() {
+//        mAuth.signOut();
+//    }
 
     public void openRegisterPage() {
         Intent registerIntent = new Intent(this, RegisterActivity.class);
         startActivity(registerIntent);
-    }
-
-    private void updateUI(FirebaseUser user) {
-
     }
 
     private boolean validateForm() {
@@ -150,6 +150,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mPasswordField.setError(null);
         }
 
+        String name = mNameField.getText().toString();
+        if (TextUtils.isEmpty(name)) {
+            mNameField.setError("Required.");
+            valid = false;
+        } else {
+            mNameField.setError(null);
+        }
+
         return valid;
     }
 
@@ -159,11 +167,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (i == R.id.buttonSignInRegister) {
             openRegisterPage();
         } else if (i == R.id.buttonSignInLogin) {
-            signIn(mEmailField.getText().toString(), mPasswordField.getText().toString());
+            signIn(mEmailField.getText().toString(), mPasswordField.getText().toString(), mNameField.getText().toString());
 //        } else if (i == R.id.signOutButton) {
 //            signOut();
-//        } else if (i == R.id.verifyEmailButton) {
-//            sendEmailVerification();
           }
     }
 }

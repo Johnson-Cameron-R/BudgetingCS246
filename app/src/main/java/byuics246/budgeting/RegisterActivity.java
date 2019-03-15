@@ -185,7 +185,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             valid = false;
         }
 
-        //Check for email in use is handled as default case be authentication failing in
+        // Check for email in use is handled as default case be authentication failing in
         // onComplete function in user creation function.
 
         return valid;
