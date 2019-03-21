@@ -1,6 +1,7 @@
 package byuics246.budgeting;
 
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.aakira.expandablelayout.ExpandableRelativeLayout;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.lang.reflect.Array;
 import java.text.NumberFormat;
@@ -44,6 +46,12 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     Spinner categoriesSpinner;
     ThreeColumnsAdapter expensesHistoryAdapter;
 
+    //Firebase DB
+    private FirebaseFirestore db;
+
+    //Login preferences
+    private SharedPreferences loginPreferences;
+    private SharedPreferences.Editor loginPrefsEditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +83,13 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
         adapterCategories.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categoriesSpinner.setAdapter(adapterCategories);
         categoriesSpinner.setOnItemSelectedListener(this);
+
+        //activate FireStore
+        db = FirebaseFirestore.getInstance();
+
+        //activate LoginPrefs
+        loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        loginPrefsEditor = loginPreferences.edit();
     }
 
 
@@ -94,9 +109,10 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     public void addToList(View view) {
 
         if (validateForm()) {
-            Expense example2 = new Expense(newDate.getText().toString(), "Inessa", category, generateCurrency(Double.valueOf(newAmount.getText().toString())));////////////////////
+            Expense example2 = new Expense(newDate.getText().toString(), loginPreferences.getString("name", ""), category, generateCurrency(Double.valueOf(newAmount.getText().toString())));////////////////////
             example2.setDescription(newDescription.getText().toString());
             expensesHistoryAdapter.add(example2);
+            db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Expenses").add(example2);
         }
     }
 

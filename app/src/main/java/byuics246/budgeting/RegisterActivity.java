@@ -70,7 +70,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
-//                            db.collection("UserInfo").document(email).set(buildUser());
                             FirebaseUser user = mAuth.getCurrentUser();
                             assert user != null;
                             user.sendEmailVerification()
