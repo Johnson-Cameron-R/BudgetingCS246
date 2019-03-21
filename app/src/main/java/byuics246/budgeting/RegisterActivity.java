@@ -1,9 +1,11 @@
 package byuics246.budgeting;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -81,14 +83,30 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                                         }
                                     });
                             saveLoginInfo(email, password);
-                            Intent openSignInActivity = new Intent(getApplicationContext(), MainActivity.class);
-                            startActivity(openSignInActivity);
+                            new AlertDialog.Builder(RegisterActivity.this)
+                                    .setTitle("Account Created")
+                                    .setMessage("You will be directed to the sign in page.")
+                                    .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            Intent openSignInActivity = new Intent(getApplicationContext(), MainActivity.class);
+                                            startActivity(openSignInActivity);
+                                        }
+                                    }).setNegativeButton("", null).show();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            mEmail.setError("Email In Use");
-                            Toast.makeText(RegisterActivity.this, "Email is already associated with an account.",
-                                    Toast.LENGTH_SHORT).show();
+                            new AlertDialog.Builder(RegisterActivity.this)
+                                    .setTitle("Email in Use")
+                                    .setMessage("This email is already registered. Sign in instead?")
+                                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            saveLoginInfo(email, password);
+                                            Intent openSignInActivity = new Intent(getApplicationContext(), MainActivity.class);
+                                            startActivity(openSignInActivity);
+                                        }
+                                    }).setNegativeButton("No", null).show();
                         }
 
                         // ...

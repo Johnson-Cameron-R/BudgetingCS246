@@ -1,9 +1,11 @@
 package byuics246.budgeting;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -106,6 +108,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 Intent openExpensesActivity = new Intent(getApplicationContext(), ExpensesActivity.class);
                                 startActivity(openExpensesActivity);
                             } else {
+                                new AlertDialog.Builder(MainActivity.this)
+                                        .setTitle("Verify Account")
+                                        .setMessage("Account is not verified. Please check your email to verify your account first.")
+                                        .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                            }
+                                        }).setNegativeButton("", null).show();
                                 Log.d(TAG, "Email is not verified !.");
                             }
                         } else {
