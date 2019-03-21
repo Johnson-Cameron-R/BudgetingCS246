@@ -1,17 +1,25 @@
 package byuics246.budgeting;
 
+import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.aakira.expandablelayout.ExpandableRelativeLayout;
 
+import java.lang.reflect.Array;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -31,6 +39,7 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     String category;
 
     //for category spinner
+    boolean hasCategory = false;
     ArrayAdapter <CharSequence> adapterCategories;
     Spinner categoriesSpinner;
     ThreeColumnsAdapter expensesHistoryAdapter;
@@ -84,12 +93,11 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
 
     public void addToList(View view) {
 
-
-        Expense example2 = new Expense(newDate.getText().toString(), "Inessa", category, newAmount.getText().toString());////////////////////
-        example2.setDescription(newDescription.getText().toString());
-        expensesHistoryAdapter.add(example2);
-
-
+        if (validateForm()) {
+            Expense example2 = new Expense(newDate.getText().toString(), "Inessa", category, generateCurrency(Double.valueOf(newAmount.getText().toString())));////////////////////
+            example2.setDescription(newDescription.getText().toString());
+            expensesHistoryAdapter.add(example2);
+        }
     }
 
 
@@ -99,10 +107,57 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         category = parent.getItemAtPosition(position).toString();
+        if (category.equals("Category")) {
+            hasCategory = false;
+        }
+        else {
+            hasCategory = true;
+        }
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-
+        hasCategory = false;
     }
+
+    //***********************************************************************************
+    //Functions
+    //***********************************************************************************
+
+    private boolean validateForm() {
+        boolean valid = true;
+
+        //Check if Amount is empty
+        String amount = newAmount.getText().toString();
+        if (TextUtils.isEmpty(amount)) {
+            newAmount.setError("Required.");
+            valid = false;
+        } else {
+            newAmount.setError(null);
+        }
+
+        //Check if Category is empty
+        if (!hasCategory) {
+            new AlertDialog.Builder(ExpensesActivity.this)
+                    .setTitle("Category Required")
+                    .setMessage("Please choose a category from the list.")
+                    .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    }).setNegativeButton("", null).show();
+            valid = false;
+        } else {
+        }
+
+        return valid;
+    }
+
+    private String generateCurrency(Double number) {
+        NumberFormat format = NumberFormat.getCurrencyInstance();
+        return format.format(number);
+    }
+
 }
+
+

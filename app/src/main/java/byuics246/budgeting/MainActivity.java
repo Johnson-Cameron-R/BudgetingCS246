@@ -25,10 +25,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String TAG = "Main";
 
-//    Planning to use with a modal pop up for notifying the user if they logged in
-//    private TextView mStatusTextView;
-//    private TextView mDetailTextView;
-
     private EditText mEmailField;
     private EditText mPasswordField;
     private EditText mNameField;
@@ -72,16 +68,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mAuth = FirebaseAuth.getInstance();
     }
 
-    //     OnStart event
-//    @Override
-//    public void onStart() {
-//        super.onStart();
-//        // Check if user is signed in (non-null) and update UI accordingly.
-////        FirebaseUser currentUser = mAuth.getCurrentUser();
-//        //updateUI(currentUser);
-//    }
-    //     [END on_start_check_user]
-
+    /**
+     * Logs a user into Firebase Authentication
+     * <p>
+     *     This function accepts the user credentials as parameters. The login form is validated,
+     *     then the info is passed to the Firebase Authentication if the form is valid. If the user
+     *     logged in successfully, they are redirected to the expense page. If the log in was not
+     *     successful then a pop up is displayed, prompting the user to try again.
+     * </p>
+     * @param email String for the user email to be authenticated with
+     * @param password String for the user password to be authenticated with
+     * @param name String for the display name to be saved in the shared preferences
+     */
     private void signIn(final String email, final String password, final String name) {
         Log.d(TAG, "signIn:" + email);
         if (!validateForm()) {
@@ -121,8 +119,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(MainActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setTitle("Authentication Failed")
+                                    .setMessage("Invalid credentials. Please try again.")
+                                    .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                        }
+                                    }).setNegativeButton("", null).show();
                         }
                     }
                 });
@@ -141,10 +145,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
     }
-
-//    private void signOut() {
-//        mAuth.signOut();
-//    }
 
     public void resetPassword() {
         if (!validatePasswordReset()) {
@@ -221,6 +221,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             signIn(mEmailField.getText().toString(), mPasswordField.getText().toString(), mNameField.getText().toString());
         } else if (i == R.id.textViewSignInForgotPassword) {
             resetPassword();
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Password Reset")
+                    .setMessage("Please check your email and follow the link to reset your password.")
+                    .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    }).setNegativeButton("", null).show();
 //        } else if (i == R.id.signOutButton) {
 //            signOut();
           }
