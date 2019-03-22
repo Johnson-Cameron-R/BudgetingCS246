@@ -56,8 +56,7 @@ class ThreeColumnsAdapter extends ArrayAdapter<Expense> {
         String user = getItem(position). getUser();
         String description = getItem(position). getDescription();
 
-        Expense expense1 = new Expense(date, user, category, amount);
-        expense1.setDescription(description);
+        Expense expense1 = new Expense(date, user, category, amount, description);
 
         LayoutInflater inflater = LayoutInflater.from(mContext);
 //        convertView = inflater.inflate(mResourse, parent, false);

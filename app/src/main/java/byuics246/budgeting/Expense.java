@@ -47,10 +47,11 @@ public class Expense {
         this.amount = amount;
     }
 
-    public Expense(String date, String user, String category, String amount) {
+    public Expense(String date, String user, String category, String amount, String description) {
         this.date = date;
         this.user = user;
         this.category = category;
         this.amount = amount;
+        this.description = description;
     }
 }

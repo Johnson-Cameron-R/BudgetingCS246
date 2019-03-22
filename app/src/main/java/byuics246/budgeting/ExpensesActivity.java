@@ -2,32 +2,40 @@ package byuics246.budgeting;
 
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.aakira.expandablelayout.ExpandableRelativeLayout;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
-import java.lang.reflect.Array;
+import org.json.JSONObject;
+
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.Map;
 
 public class ExpensesActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+    private static final String TAG = "Expenses";
+
     ExpandableRelativeLayout expandableRelativeLayout;
 
     //for history listView
@@ -58,16 +66,38 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expenses);
 
+        //activate FireStore
+        db = FirebaseFirestore.getInstance();
+
+        //activate LoginPrefs
+        loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        loginPrefsEditor = loginPreferences.edit();
+
         //activate a history list view
         listView = (ListView) findViewById(R.id.listViewExpensesHistory);
         listExpenses = new ArrayList<>();
-        Expense example = new Expense("03/05/2019", "Inessa", "food", "100.00");//////////////////////////////////
-//        Expense example2 = new Expense("03/05/2019", "Inessa", "food", "100.00");/////////////////////////////////////////////////////////
-//        listExpenses.add(example2);
-        listExpenses.add(example);
-        expensesHistoryAdapter = new ThreeColumnsAdapter(this, R.layout.three_columns_history_layout, listExpenses);
-        listView.setAdapter(expensesHistoryAdapter);
-        expensesHistoryAdapter.add(example);//////////////////////////////////////////////////////////////////////////////////////////////
+
+        //get data from DB and add it to the viewer.
+        db.collection(loginPreferences.getString("email", "") + "/Budget/Expenses")
+                .orderBy("date", Query.Direction.DESCENDING)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        Map<String, Object> expenseData;
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                expenseData = document.getData();
+                                Expense expense = new Expense(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
+                                listExpenses.add(expense);
+                            }
+                            expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
+                            listView.setAdapter(expensesHistoryAdapter);
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
 
         //activate add new expense fields
         newDate = findViewById(R.id.editTextExpensesNewDate);
@@ -83,13 +113,6 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
         adapterCategories.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categoriesSpinner.setAdapter(adapterCategories);
         categoriesSpinner.setOnItemSelectedListener(this);
-
-        //activate FireStore
-        db = FirebaseFirestore.getInstance();
-
-        //activate LoginPrefs
-        loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
-        loginPrefsEditor = loginPreferences.edit();
     }
 
 
@@ -109,8 +132,7 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     public void addToList(View view) {
 
         if (validateForm()) {
-            Expense example2 = new Expense(newDate.getText().toString(), loginPreferences.getString("name", ""), category, generateCurrency(Double.valueOf(newAmount.getText().toString())));////////////////////
-            example2.setDescription(newDescription.getText().toString());
+            Expense example2 = new Expense(newDate.getText().toString(), loginPreferences.getString("name", ""), category, generateCurrency(Double.valueOf(newAmount.getText().toString())),newDescription.getText().toString());////////////////////
             expensesHistoryAdapter.add(example2);
             db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Expenses").add(example2);
         }
