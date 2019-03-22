@@ -1,6 +1,7 @@
 package byuics246.budgeting;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
@@ -196,6 +197,10 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
         return format.format(number);
     }
 
+    public void reportsPage(View view) {
+        Intent reportsIntent = new Intent(this, Reports.class);
+        startActivity(reportsIntent);
+    }
 }
 
 
