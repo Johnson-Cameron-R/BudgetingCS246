@@ -49,6 +49,8 @@ public class Reports extends AppCompatActivity {
             else {
                 mywb.updateSheetNumber(0, 28, 4, (double) 40.05);
                 mywb.close();
+                Toast.makeText(this, "File is saved!",
+                        Toast.LENGTH_LONG).show();
             }
         }
     }
