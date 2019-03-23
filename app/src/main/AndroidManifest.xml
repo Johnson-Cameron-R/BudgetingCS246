@@ -12,6 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".IncomeActivity"></activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -21,8 +22,8 @@
         </activity>
         <activity
             android:name=".RegisterActivity"
-            android:label="BudgetingCS246"></activity>
-        <activity android:name=".ExpensesActivity"></activity>
+            android:label="BudgetingCS246" />
+        <activity android:name=".ExpensesActivity" />
     </application>
 
 </manifest>
