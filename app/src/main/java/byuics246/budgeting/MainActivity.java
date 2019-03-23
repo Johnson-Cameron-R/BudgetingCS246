@@ -1,16 +1,18 @@
 package byuics246.budgeting;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.TextView;
+//import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -23,14 +25,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String TAG = "Main";
 
-    private TextView mStatusTextView;
-    private TextView mDetailTextView;
     private EditText mEmailField;
     private EditText mPasswordField;
+    private EditText mNameField;
     private CheckBox saveLoginCheckBox;
     private SharedPreferences loginPreferences;
     private SharedPreferences.Editor loginPrefsEditor;
     private Boolean saveLogin;
+
 
     // [Start declare_auth]
     private FirebaseAuth mAuth;
@@ -42,41 +44,49 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         mPasswordField = findViewById(R.id.editTextSignInPassword);
-
-        // Views
         mEmailField = findViewById(R.id.editTextSignInUsername);
+        mNameField = findViewById(R.id.editTextSignInDisplayName);
         saveLoginCheckBox = findViewById(R.id.checkBoxSignInSaveUser);
+
         loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
         loginPrefsEditor = loginPreferences.edit();
         saveLogin = loginPreferences.getBoolean("saveLogin", false);
         if (saveLogin == true) {
             mEmailField.setText(loginPreferences.getString("email", ""));
             mPasswordField.setText(loginPreferences.getString("password", ""));
+            mNameField.setText(loginPreferences.getString("name", ""));
             saveLoginCheckBox.setChecked(true);
         }
         // Buttons
         findViewById(R.id.buttonSignInLogin).setOnClickListener(this);
         findViewById(R.id.buttonSignInRegister).setOnClickListener(this);
 
+        //reset password
+        findViewById(R.id.textViewSignInForgotPassword).setOnClickListener(this);
+
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
     }
 
-    //     [START on_start_check_user]
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        //updateUI(currentUser);
-    }
-    //     [END on_start_check_user]
-
-    private void signIn(final String email, final String password) {
+    /**
+     * Logs a user into Firebase Authentication
+     * <p>
+     *     This function accepts the user credentials as parameters. The login form is validated,
+     *     then the info is passed to the Firebase Authentication if the form is valid. If the user
+     *     logged in successfully, they are redirected to the expense page. If the log in was not
+     *     successful then a pop up is displayed, prompting the user to try again.
+     * </p>
+     * @param email String for the user email to be authenticated with
+     * @param password String for the user password to be authenticated with
+     * @param name String for the display name to be saved in the shared preferences
+     */
+    private void signIn(final String email, final String password, final String name) {
         Log.d(TAG, "signIn:" + email);
         if (!validateForm()) {
+            Log.d(TAG, "FormNotValid");
             return;
         }
+        Log.d(TAG, "FormValid");
 
         // [START sign_in_with_email]
         mAuth.signInWithEmailAndPassword(email, password)
@@ -87,28 +97,47 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            saveLoginInfo(email, password);
-                            updateUI(user);
-                            Intent openExpensesActivity = new Intent(getApplicationContext(), ExpensesActivity.class);
-                            startActivity(openExpensesActivity);
+                            assert user != null;
+                            if (user.isEmailVerified()) {
+                                Log.d(TAG, "Email is verified.");
+                                saveLoginInfo(email, password, name);
+                                // send user to expense page after login
+                                Log.d(TAG, "saved credentials, sending to expense page");
+                                Intent openExpensesActivity = new Intent(getApplicationContext(), ExpensesActivity.class);
+                                startActivity(openExpensesActivity);
+                            } else {
+                                new AlertDialog.Builder(MainActivity.this)
+                                        .setTitle("Verify Account")
+                                        .setMessage("Account is not verified. Please check your email to verify your account first.")
+                                        .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                            }
+                                        }).setNegativeButton("", null).show();
+                                Log.d(TAG, "Email is not verified !.");
+                            }
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(MainActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                            updateUI(null);
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setTitle("Authentication Failed")
+                                    .setMessage("Invalid credentials. Please try again.")
+                                    .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                        }
+                                    }).setNegativeButton("", null).show();
                         }
-
-                        // ...
                     }
                 });
     }
 
-    private void saveLoginInfo(String email, String password) {
+    private void saveLoginInfo(String email, String password, String name) {
         if (saveLoginCheckBox.isChecked()) {
             loginPrefsEditor.putBoolean("saveLogin", true);
             loginPrefsEditor.putString("email", email);
             loginPrefsEditor.putString("password", password);
+            loginPrefsEditor.putString("name", name);
             loginPrefsEditor.commit();
         } else {
             loginPrefsEditor.clear();
@@ -117,18 +146,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void signOut() {
-        mAuth.signOut();
-        updateUI(null);
+    public void resetPassword() {
+        if (!validatePasswordReset()) {
+            Log.d(TAG, "FormNotValid");
+            return;
+        }
+
+        mAuth.sendPasswordResetEmail(mEmailField.getText().toString())
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "Email sent.");
+                        }
+                    }
+                });
+    }
+
+    private boolean validatePasswordReset() {
+        boolean valid = true;
+
+        String email = mEmailField.getText().toString();
+        if (TextUtils.isEmpty(email)) {
+            mEmailField.setError("Required.");
+            valid = false;
+        } else {
+            mEmailField.setError(null);
+        }
+
+        return valid;
     }
 
     public void openRegisterPage() {
         Intent registerIntent = new Intent(this, RegisterActivity.class);
         startActivity(registerIntent);
-    }
-
-    private void updateUI(FirebaseUser user) {
-
     }
 
     private boolean validateForm() {
@@ -150,6 +201,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mPasswordField.setError(null);
         }
 
+        String name = mNameField.getText().toString();
+        if (TextUtils.isEmpty(name)) {
+            mNameField.setError("Required.");
+            valid = false;
+        } else {
+            mNameField.setError(null);
+        }
+
         return valid;
     }
 
@@ -159,11 +218,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (i == R.id.buttonSignInRegister) {
             openRegisterPage();
         } else if (i == R.id.buttonSignInLogin) {
-            signIn(mEmailField.getText().toString(), mPasswordField.getText().toString());
+            signIn(mEmailField.getText().toString(), mPasswordField.getText().toString(), mNameField.getText().toString());
+        } else if (i == R.id.textViewSignInForgotPassword) {
+            resetPassword();
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Password Reset")
+                    .setMessage("Please check your email and follow the link to reset your password.")
+                    .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    }).setNegativeButton("", null).show();
 //        } else if (i == R.id.signOutButton) {
 //            signOut();
-//        } else if (i == R.id.verifyEmailButton) {
-//            sendEmailVerification();
           }
     }
 }
