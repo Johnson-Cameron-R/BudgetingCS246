@@ -1,6 +1,6 @@
 package byuics246.budgeting;
 
-public class Transaction implements MoneyFlow{
+public class Transaction {
     String date;/////
     String user;
     String description;

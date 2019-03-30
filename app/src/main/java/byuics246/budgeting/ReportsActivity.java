@@ -17,14 +17,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import jxl.write.WritableWorkbook;
 
-public class Reports extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
-    private static final String TAG = "Reports";
+public class ReportsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+    private static final String TAG = "ReportsActivity";
 
     String filePath = "";
     String folder = "/Simple_Budgeting_files/";
@@ -103,29 +101,48 @@ public class Reports extends AppCompatActivity implements AdapterView.OnItemSele
     }
 
     private void populateWorkbook(MyWritableWorkbook mywb, int monthNumber) {
-        //Pull goals categories and values
-        Map <String, Integer> expensesCategories = new HashMap<>();
-        expensesCategories.put("Inactive Savings", 0);
-        expensesCategories.put("Education", 1);
+        //Pull income goals categories and values
+        List <Goal> incomesGoals = new ArrayList<>();
+        incomesGoals.add(new Goal("job1", "500", "1"));
+        incomesGoals.add(new Goal("job2", "600", "2"));
+
+
+        //Pull expenses goals categories and values
+        List <Goal> expensesGoals = new ArrayList<>();
+        expensesGoals.add(new Goal("Inactive Savings", "700", "1"));
+        expensesGoals.add(new Goal("Education", "800", "2"));
 
         // Pull incomes of the asked month and year
+        List<Transaction> incomes =  new ArrayList<Transaction>();
+        incomes.add(new Transaction("03/17/2019", "user", "1", "100", "description"));
+        incomes.add(new Transaction("03/10/2019", "user", "2", "200", "description"));
+        incomes.add(new Transaction("03/10/2019", "user", "2", "300", "description"));
 
         // Pull expences of the asked month and year
         List<Transaction> expenses =  new ArrayList<Transaction>();
-        expenses.add(new Transaction("03/17/2019", "user", "Inactive Savings", "100", "description"));
-        expenses.add(new Transaction("03/10/2019", "user", "Education", "200", "description"));
-        expenses.add(new Transaction("03/10/2019", "user", "Education", "300", "description"));
+        expenses.add(new Transaction("03/17/2019", "user", "1", "100", "description"));
+        expenses.add(new Transaction("03/10/2019", "user", "2", "200", "description"));
+        expenses.add(new Transaction("03/10/2019", "user", "2", "300", "description"));
 
-        int startExpencesCellsX = 4 - 1;
-        int startExpencesCellsY = 33;
-        int startIncomeCellsX = 4;
-        int startIncomeCellsY = 33;
+        int startIncomesCategoriesCellY = 18 - 1;
+        int startExpensesCategoriesCellY = 33 - 1;
+        int startExpensesIncomesCategoriesCellX = 0 - 1; // names of goals
+        int startExpensesIncomesGoalsCellX = 1 - 1; // amount of goals
+        int startExpensesIncomesCellsX = 4 - 1;
 
         // create Cell records
-        List <CellRecord> cellRecords = getExpensesRecords(expenses, expensesCategories, startExpencesCellsX, startExpencesCellsY);
+        List <CellNumberRecord> cellNumberRecords = new ArrayList<>();
+        cellNumberRecords.addAll(getRecords(incomes, startExpensesIncomesCellsX, startIncomesCategoriesCellY));
+        cellNumberRecords.addAll(getRecords(expenses, startExpensesIncomesCellsX, startExpensesCategoriesCellY));
+        cellNumberRecords.addAll(getGoalRecordsNumber(expensesGoals, startExpensesIncomesGoalsCellX, startExpensesCategoriesCellY));
+        cellNumberRecords.addAll(getGoalRecordsNumber(incomesGoals, startExpensesIncomesGoalsCellX, startIncomesCategoriesCellY));
+
+        List <CellStringRecord> cellStringRecords = new ArrayList<>();
+        cellStringRecords.addAll(getGoalRecordsString(expensesGoals, startExpensesIncomesCellsX, startExpensesCategoriesCellY));
+        cellStringRecords.addAll(getGoalRecordsString(incomesGoals, startExpensesIncomesCellsX, startIncomesCategoriesCellY));
 
         //Update excel
-        mywb.updateSheetNumber(0, cellRecords);
+        mywb.updateSheet(0, cellNumberRecords, cellStringRecords);
         mywb.close();
 
     }
@@ -151,7 +168,7 @@ public class Reports extends AppCompatActivity implements AdapterView.OnItemSele
             DownloadManager downloadManager= (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
             downloadManager.enqueue(request);// enqueue puts the download request in the queue.
         }
-        return true;/////////////////////////////
+        return true;
     }
 
 
@@ -172,33 +189,60 @@ public class Reports extends AppCompatActivity implements AdapterView.OnItemSele
 
     }
 
-    private List <CellRecord> getExpensesRecords(List <Transaction> expenses, Map <String, Integer> expensesCategories, int startExpencesCellsX, int startExpencesCellsY)
+    private List <CellNumberRecord> getRecords(List <Transaction> transactions, int startCellsX, int startCellsY)
     {
-        List <CellRecord> cellRecords = new ArrayList<>();
-        for (Transaction ex : expenses) {
+        List <CellNumberRecord> cellNumberRecords = new ArrayList<>();
+        for (Transaction ex : transactions) {
             try {
                 Date date=new SimpleDateFormat("MM/dd/yyyy").parse(ex.date);
                 int day = date.getDate();
-                int category = expensesCategories.get(ex.category);
+                int category = Integer.parseInt(ex.getCategory());
                 double amount = Double.parseDouble(ex.getAmount());
                 // if there is a record for the same day for the same category, update its value to its original value + amount
                 boolean found = false;
-                CellRecord crMatching = null;
-                for (CellRecord cr : cellRecords){
-                    if (cr.getColumn() == day + startExpencesCellsX && cr.getRow() == category + startExpencesCellsY){
+                CellNumberRecord crMatching = null;
+                for (CellNumberRecord cr : cellNumberRecords){
+                    if (cr.getColumn() == day + startCellsX && cr.getRow() == category + startCellsY){
                         found = true;
                         cr.setValue(amount + cr.getValue());
+                        break;
                     }
                 }
                 //if there are no records for the same day for the same category create a new record
                 if (!found) {
-                    CellRecord cellRecord = new CellRecord(day + startExpencesCellsX, category + startExpencesCellsY, amount);
-                    cellRecords.add(cellRecord);
+                    CellNumberRecord cellNumberRecord = new CellNumberRecord(day + startCellsX, category + startCellsY, amount);
+                    cellNumberRecords.add(cellNumberRecord);
                 }
             } catch (ParseException e) {
                 e.printStackTrace();
             }
         }
-        return cellRecords;
+        return cellNumberRecords;
     }
+
+
+    private List <CellStringRecord> getGoalRecordsString(List <Goal> goals, int startCellsX, int startCellsY)
+    {
+        List <CellStringRecord> cellStringRecords = new ArrayList<>();
+        for (Goal g : goals) {
+            String value = g.getName();
+            int id = Integer.parseInt(g.getId());
+            CellStringRecord cellStringRecord = new CellStringRecord(startCellsX + 1, id + startCellsY, value);
+            cellStringRecords.add(cellStringRecord);
+
+        }
+        return cellStringRecords;
+    }
+
+    private List <CellNumberRecord> getGoalRecordsNumber(List <Goal> goals, int startCellsX, int startCellsY) {
+        List<CellNumberRecord> cellNumberRecords = new ArrayList<>();
+        for (Goal g : goals) {
+            Double value = Double.parseDouble(g.getAmount());
+            int id = Integer.parseInt(g.getId());
+            CellNumberRecord cellNumberRecord = new CellNumberRecord(startCellsX + 1, id + startCellsY, value);
+            cellNumberRecords.add(cellNumberRecord);
+        }
+        return cellNumberRecords;
+    }
+
 }

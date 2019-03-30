@@ -1,11 +1,11 @@
 package byuics246.budgeting;
 
-class CellRecord {
+class CellNumberRecord {
     int column;
     int row;
     double value;
 
-    public CellRecord(int column, int row, double value) {
+    public CellNumberRecord(int column, int row, double value) {
         this.column = column;
         this.row = row;
         this.value = value;

@@ -14,7 +14,7 @@ public class MonthStringToIntConverter {
                 monthInt = 1;
                 break;
 
-            case "Febuary":
+            case "February":
                 monthInt = 2;
                 break;
 

@@ -24,7 +24,7 @@
             android:name=".RegisterActivity"
             android:label="BudgetingCS246" />
         <activity android:name=".ExpensesActivity" />
-        <activity android:name=".Reports"></activity>
+        <activity android:name=".ReportsActivity"></activity>
     </application>
 
 </manifest>

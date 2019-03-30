@@ -1,13 +1,9 @@
 package byuics246.budgeting;
 
 
-import android.app.Activity;
-import android.app.DownloadManager;
-import android.net.Uri;
 import android.os.Environment;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +23,6 @@ import jxl.write.biff.RowsExceededException;
 import jxl.write.Number;
 
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
-
-import static android.content.Context.DOWNLOAD_SERVICE;
 
 
 public class MyWritableWorkbook {
@@ -171,16 +163,17 @@ public class MyWritableWorkbook {
         return ws;
     }
 
-    public void updateSheetNumber(int sheetNumber, List<CellRecord> cellRecords)
+    public void updateSheet(int sheetNumber, List<CellNumberRecord> cellNumberRecords, List<CellStringRecord> cellStringRecords)
     {
         WritableSheet sheet = wb.getSheet(sheetNumber);
-        List <Number> numbers = new ArrayList();
         try {
-            for (CellRecord cr : cellRecords) {
-//            Label label = new Label(column,row,value);
-//            sheet.addCell((label));
+            for (CellNumberRecord cr : cellNumberRecords) {
                 Number number = new Number(cr.getColumn(), cr.getRow(),cr.getValue());
                 sheet.addCell(number);
+            }
+            for (CellStringRecord cr : cellStringRecords) {
+                Label label = new Label(cr.getColumn(), cr.getRow(),cr.getValue());
+                sheet.addCell(label);
             }
             wb.write();
         } catch (WriteException e) {

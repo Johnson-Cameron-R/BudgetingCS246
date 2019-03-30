@@ -194,7 +194,7 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     }
 
     public void reportsPage(View view) {
-        Intent reportsIntent = new Intent(this, Reports.class);
+        Intent reportsIntent = new Intent(this, ReportsActivity.class);
         startActivity(reportsIntent);
     }
 }
