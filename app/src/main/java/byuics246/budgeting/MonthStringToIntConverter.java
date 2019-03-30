@@ -1,6 +1,9 @@
 package byuics246.budgeting;
 
+import android.util.Log;
+
 public class MonthStringToIntConverter {
+    private static final String TAG = "MonthStringToIntConvert";
     String month;
 
     public MonthStringToIntConverter(String monthName) {
@@ -58,6 +61,8 @@ public class MonthStringToIntConverter {
             case "December":
                 monthInt = 12;
                 break;
+            default:
+                Log.d(TAG, "Wrong month value");
         }
         return monthInt;
     }

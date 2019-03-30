@@ -24,13 +24,10 @@ import jxl.write.WritableWorkbook;
 public class ReportsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private static final String TAG = "ReportsActivity";
 
-    String filePath = "";
     String folder = "/Simple_Budgeting_files/";
     String file_name_inp = "Don't Change.xls";
     String file_name_out = "Month.xls";
-    File inp;
-    File out;
-    WritableWorkbook wb;
+
     String month;
     String year;
 
@@ -55,16 +52,17 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         adapterYears.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         yearsSpinner.setAdapter(adapterYears);
         yearsSpinner.setOnItemSelectedListener(this);
-
-
     }
 
     public void requestReport(View view){
+        // Pull data from web elements
         file_name_out = month + year + ".xls";
         int monthNumber = new MonthStringToIntConverter(month).convert();
         if (monthNumber != 0) {
 
             //request and check permissions
+
+
 
             //create a directory
             MyWritableWorkbook mywb = new MyWritableWorkbook();
@@ -73,9 +71,10 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
                 Toast.makeText(this, "Make sure you add a writing memory permission to the app and try again",
                         Toast.LENGTH_LONG).show();
             } else {
+                // download templete
                 downloadTemplete();
+                // create a copy of the templete
                 int creationResult = mywb.createCopyWorkbook(file_name_inp, file_name_out);
-                //make sure the excel is closed
                 if (creationResult == 1) {
                     Toast.makeText(this, "Make sure that excel reports in the app folder are closed and try again",
                             Toast.LENGTH_LONG).show();
@@ -83,20 +82,12 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
                     Toast.makeText(this, "The templete is having issues downloading. Try again later",
                             Toast.LENGTH_LONG).show();
                 } else {
+                    // fill in the report
                     populateWorkbook(mywb, monthNumber);
-                    //
-                    //                mywb.updateSheetNumber(0, 28, 4, (double) 40.05);
-                    //                mywb.close();
-                    Toast.makeText(this, "File is saved in  internal storage/Simple_Budgeting_files!",
+                    Toast.makeText(this, "File is saved in  internal storage/Simple_Budgeting_files/" + file_name_out + "!",
                             Toast.LENGTH_LONG).show();
                 }
             }
-
-        }
-        else {
-            Log.d(TAG, "Wrong month value");
-            Toast.makeText(this, "Please select a month",
-                    Toast.LENGTH_LONG).show();
         }
     }
 
