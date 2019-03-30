@@ -105,9 +105,9 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
 
         // Pull incomes of the asked month and year
         List<Transaction> incomes =  new ArrayList<Transaction>();
-        incomes.add(new Transaction("03/17/2019", "user", "1", "100", "description"));
-        incomes.add(new Transaction("03/10/2019", "user", "2", "200", "description"));
-        incomes.add(new Transaction("03/10/2019", "user", "2", "300", "description"));
+        incomes.add(new Transaction("03/17/2019", "user", "1", "400", "description"));
+        incomes.add(new Transaction("03/10/2019", "user", "2", "600", "description"));
+        incomes.add(new Transaction("03/10/2019", "user", "2", "125", "description"));
 
         // Pull expences of the asked month and year
         List<Transaction> expenses =  new ArrayList<Transaction>();
@@ -129,8 +129,8 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         cellNumberRecords.addAll(getGoalRecordsNumber(incomesGoals, startExpensesIncomesGoalsCellX, startIncomesCategoriesCellY));
 
         List <CellStringRecord> cellStringRecords = new ArrayList<>();
-        cellStringRecords.addAll(getGoalRecordsString(expensesGoals, startExpensesIncomesCellsX, startExpensesCategoriesCellY));
-        cellStringRecords.addAll(getGoalRecordsString(incomesGoals, startExpensesIncomesCellsX, startIncomesCategoriesCellY));
+        cellStringRecords.addAll(getGoalRecordsString(expensesGoals, startExpensesIncomesCategoriesCellX, startExpensesCategoriesCellY));
+        cellStringRecords.addAll(getGoalRecordsString(incomesGoals, startExpensesIncomesCategoriesCellX, startIncomesCategoriesCellY));
 
         //Update excel
         mywb.updateSheet(0, cellNumberRecords, cellStringRecords);

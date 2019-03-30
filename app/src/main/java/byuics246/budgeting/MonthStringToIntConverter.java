@@ -46,7 +46,6 @@ public class MonthStringToIntConverter {
                 break;
 
             case "September":
-            case "sep":
                 monthInt = 9;
                 break;
 
@@ -66,5 +65,4 @@ public class MonthStringToIntConverter {
         }
         return monthInt;
     }
-
 }
