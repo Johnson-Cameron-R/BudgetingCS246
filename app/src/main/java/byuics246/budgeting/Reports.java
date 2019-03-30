@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.telecom.CallScreeningService;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -16,17 +15,12 @@ import android.widget.Toast;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
-import jxl.Cell;
-import jxl.write.DateTime;
 import jxl.write.WritableWorkbook;
 
 public class Reports extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
@@ -109,52 +103,28 @@ public class Reports extends AppCompatActivity implements AdapterView.OnItemSele
     }
 
     private void populateWorkbook(MyWritableWorkbook mywb, int monthNumber) {
-        // Goals
-            //Pull goals categories and values
-            //Update excel
+        //Pull goals categories and values
         Map <String, Integer> expensesCategories = new HashMap<>();
         expensesCategories.put("Inactive Savings", 0);
         expensesCategories.put("Education", 1);
 
-        // Expenses
-            //Pull expences of the asked month and year
-        List<Expense> expenses =  new ArrayList<Expense>();
-        expenses.add(new Expense("03/17/2019", "user", "Inactive Savings", "100", "description"));
-        expenses.add(new Expense("03/10/2019", "user", "Education", "200", "description"));
-        expenses.add(new Expense("03/10/2019", "user", "Education", "300", "description"));
+        // Pull incomes of the asked month and year
 
-           //Update excel
+        // Pull expences of the asked month and year
+        List<Transaction> expenses =  new ArrayList<Transaction>();
+        expenses.add(new Transaction("03/17/2019", "user", "Inactive Savings", "100", "description"));
+        expenses.add(new Transaction("03/10/2019", "user", "Education", "200", "description"));
+        expenses.add(new Transaction("03/10/2019", "user", "Education", "300", "description"));
+
         int startExpencesCellsX = 4 - 1;
         int startExpencesCellsY = 33;
-
         int startIncomeCellsX = 4;
         int startIncomeCellsY = 33;
 
-        List <CellRecord> cellRecords = new ArrayList<>();
-        for (Expense ex : expenses) {
-            try {
-                Date date=new SimpleDateFormat("MM/dd/yyyy").parse(ex.date);
-                int day = date.getDate();
-                int category = expensesCategories.get(ex.category);
-                double amount = Double.parseDouble(ex.getAmount());
-                // if there is a record for the same day for the same category, update its value to its original value + amount
-                boolean found = false;
-                CellRecord crMatching = null;
-                for (CellRecord cr : cellRecords){
-                    if (cr.getColumn() == day + startExpencesCellsX && cr.getRow() == category + startExpencesCellsY){
-                        found = true;
-                        cr.setValue(amount + cr.getValue());
-                    }
-                }
-                //if there are no records for the same day for the same category create a new record
-                if (!found) {
-                    CellRecord cellRecord = new CellRecord(day + startExpencesCellsX, category + startExpencesCellsY, amount);
-                    cellRecords.add(cellRecord);
-                }
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        }
+        // create Cell records
+        List <CellRecord> cellRecords = getExpensesRecords(expenses, expensesCategories, startExpencesCellsX, startExpencesCellsY);
+
+        //Update excel
         mywb.updateSheetNumber(0, cellRecords);
         mywb.close();
 
@@ -190,13 +160,45 @@ public class Reports extends AppCompatActivity implements AdapterView.OnItemSele
         switch(parent.getId()) {
             case R.id.spinnerReportsMonths:
                 month = parent.getItemAtPosition(position).toString();
+                break;
             case R.id.spinnerReportsYears:
                 year = parent.getItemAtPosition(position).toString();
+                break;
         }
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
+    }
+
+    private List <CellRecord> getExpensesRecords(List <Transaction> expenses, Map <String, Integer> expensesCategories, int startExpencesCellsX, int startExpencesCellsY)
+    {
+        List <CellRecord> cellRecords = new ArrayList<>();
+        for (Transaction ex : expenses) {
+            try {
+                Date date=new SimpleDateFormat("MM/dd/yyyy").parse(ex.date);
+                int day = date.getDate();
+                int category = expensesCategories.get(ex.category);
+                double amount = Double.parseDouble(ex.getAmount());
+                // if there is a record for the same day for the same category, update its value to its original value + amount
+                boolean found = false;
+                CellRecord crMatching = null;
+                for (CellRecord cr : cellRecords){
+                    if (cr.getColumn() == day + startExpencesCellsX && cr.getRow() == category + startExpencesCellsY){
+                        found = true;
+                        cr.setValue(amount + cr.getValue());
+                    }
+                }
+                //if there are no records for the same day for the same category create a new record
+                if (!found) {
+                    CellRecord cellRecord = new CellRecord(day + startExpencesCellsX, category + startExpencesCellsY, amount);
+                    cellRecords.add(cellRecord);
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        return cellRecords;
     }
 }

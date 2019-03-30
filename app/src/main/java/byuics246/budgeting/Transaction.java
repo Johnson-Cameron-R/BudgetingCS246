@@ -1,6 +1,6 @@
 package byuics246.budgeting;
 
-public class Expense {
+public class Transaction implements MoneyFlow{
     String date;/////
     String user;
     String description;
@@ -47,7 +47,7 @@ public class Expense {
         this.amount = amount;
     }
 
-    public Expense(String date, String user, String category, String amount, String description) {
+    public Transaction(String date, String user, String category, String amount, String description) {
         this.date = date;
         this.user = user;
         this.category = category;

@@ -10,18 +10,16 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import byuics246.budgeting.Expense;
-
-class ThreeColumnsAdapter extends ArrayAdapter<Expense> {
+class ThreeColumnsAdapter extends ArrayAdapter<Transaction> {
     private Context mContext;
     private LayoutInflater mLayoutInflater;
     int mResourse;
-    ArrayList <Expense> mObjects;
+    ArrayList <Transaction> mObjects;
 
     int second=0;
     int first=0;
 
-    public ThreeColumnsAdapter(Context context, int resource, ArrayList<Expense> objects) {
+    public ThreeColumnsAdapter(Context context, int resource, ArrayList<Transaction> objects) {
         super(context, resource, objects);
         mContext = context;
         mLayoutInflater = LayoutInflater.from(context);
@@ -56,7 +54,7 @@ class ThreeColumnsAdapter extends ArrayAdapter<Expense> {
         String user = getItem(position). getUser();
         String description = getItem(position). getDescription();
 
-        Expense expense1 = new Expense(date, user, category, amount, description);
+        Transaction expense1 = new Transaction(date, user, category, amount, description);
 
         LayoutInflater inflater = LayoutInflater.from(mContext);
 //        convertView = inflater.inflate(mResourse, parent, false);
