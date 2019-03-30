@@ -18,15 +18,11 @@ import android.widget.Spinner;
 
 import com.github.aakira.expandablelayout.ExpandableRelativeLayout;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-
-import org.json.JSONObject;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -41,7 +37,7 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
 
     //for history listView
     ListView listView;
-    ArrayList <Expense> listExpenses;
+    ArrayList <Transaction> listExpenses;
 
     //for add new expense
     private EditText newDate;
@@ -89,7 +85,7 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 expenseData = document.getData();
-                                Expense expense = new Expense(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
+                                Transaction expense = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
                                 listExpenses.add(expense);
                             }
                             expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
@@ -133,7 +129,7 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     public void addToList(View view) {
 
         if (validateForm()) {
-            Expense example2 = new Expense(newDate.getText().toString(), loginPreferences.getString("name", ""), category, generateCurrency(Double.valueOf(newAmount.getText().toString())),newDescription.getText().toString());////////////////////
+            Transaction example2 = new Transaction(newDate.getText().toString(), loginPreferences.getString("name", ""), category, generateCurrency(Double.valueOf(newAmount.getText().toString())),newDescription.getText().toString());////////////////////
             expensesHistoryAdapter.add(example2);
             db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Expenses").add(example2);
         }

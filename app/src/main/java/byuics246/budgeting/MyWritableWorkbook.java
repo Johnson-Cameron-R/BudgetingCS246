@@ -9,6 +9,8 @@ import android.os.Environment;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import jxl.Workbook;
@@ -25,11 +27,14 @@ import jxl.write.biff.RowsExceededException;
 import jxl.write.Number;
 
 import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
 import static android.content.Context.DOWNLOAD_SERVICE;
 
 
 public class MyWritableWorkbook {
+    private static final String TAG = "Writable book";
     String folder;
     File directory;
     String file_name_inp;
@@ -37,7 +42,6 @@ public class MyWritableWorkbook {
     File inp;
     File out;
     public WritableWorkbook wb;
-    private static final String TAG = "Creating";
     File sdCard = Environment.getExternalStorageDirectory();
 
 
@@ -69,25 +73,42 @@ public class MyWritableWorkbook {
 
     //String inp, String out){file_name_inp = inp; file_name_out = out;
 
-    public boolean createCopyWorkbook (String templete, String copy)
+    public int createCopyWorkbook (String templete, String copy)
     {
         file_name_inp = templete;
         file_name_out = copy;
         String path = sdCard.getAbsolutePath()+ folder +file_name_inp;
         inp = new File (path);
-        out = new File (sdCard.getAbsolutePath() + folder +file_name_out);
-        try {
-            Workbook existingWorkbook = Workbook.getWorkbook(inp);// This opens up a read-only copy of the workbook
-            wb = Workbook.createWorkbook(out,existingWorkbook); // This opens up a writable workbook so that we can edit the copy
-            existingWorkbook.close();    // Important: Close it before writing the copy with copy.write();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        } catch (BiffException e) {
-            e.printStackTrace();
-            return false;
+        for (int i = 0; i < 30; i++) {
+            if (inp.exists()) {
+                out = new File(sdCard.getAbsolutePath() + folder + file_name_out);
+                try {
+                    Workbook existingWorkbook = Workbook.getWorkbook(inp);// This opens up a read-only copy of the workbook
+                    wb = Workbook.createWorkbook(out, existingWorkbook); // This opens up a writable workbook so that we can edit the copy
+                    existingWorkbook.close();    // Important: Close it before writing the copy with copy.write();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.d(TAG, "An exception in createCopyWorkbook");
+                    return 1;
+                } catch (BiffException e) {
+                    e.printStackTrace();
+                    Log.d(TAG, "An exception in createCopyWorkbook2");
+                    return 1;
+                }
+                Log.d(TAG, "Success in createCopyWorkbook");
+                return 0;
+            } else {
+                try {
+                    Thread.sleep(600);
+                    Log.d(TAG, "The templete isn't loaded yet");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    Log.d(TAG, "An exception in createCopyWorkbook3");
+                }
+            }
         }
-        return true;
+        Log.d(TAG, "The templete isn't loaded");
+        return 2;
     }
 
 
@@ -150,16 +171,17 @@ public class MyWritableWorkbook {
         return ws;
     }
 
-    public void updateSheetNumber(int sheetNumber, int row, int column, double value)
+    public void updateSheetNumber(int sheetNumber, List<CellRecord> cellRecords)
     {
         WritableSheet sheet = wb.getSheet(sheetNumber);
-
+        List <Number> numbers = new ArrayList();
         try {
+            for (CellRecord cr : cellRecords) {
 //            Label label = new Label(column,row,value);
 //            sheet.addCell((label));
-            Number number = new Number(column,row,value);
-            sheet.addCell(number);
-
+                Number number = new Number(cr.getColumn(), cr.getRow(),cr.getValue());
+                sheet.addCell(number);
+            }
             wb.write();
         } catch (WriteException e) {
             e.printStackTrace();
