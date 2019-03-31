@@ -6,6 +6,12 @@
         <item>Gas</item>
     </string-array>
 
+    <string-array name="Sources">
+        <item>Source</item>
+        <item>Navex</item>
+        <item>BYUI</item>
+    </string-array>
+
     <string-array name="Months">
         <item>January</item>
         <item>February</item>

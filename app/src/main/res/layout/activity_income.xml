@@ -42,7 +42,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textViewRegisterTitle2" />
 
     <com.github.aakira.expandablelayout.ExpandableRelativeLayout
-        android:id="@+id/AddNewExpenseLayout"
+        android:id="@+id/AddNewIncomeLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/buttonIncomeAddNew"
@@ -159,11 +159,11 @@
         android:text="Show history"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_below="@+id/AddNewExpenseLayout"
+        android:layout_below="@+id/AddNewIncomeLayout"
         />
 
     <com.github.aakira.expandablelayout.ExpandableRelativeLayout
-        android:id="@+id/ShowHistoryExpenseLayout"
+        android:id="@+id/ShowHistoryIncomeLayout"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:layout_below="@+id/buttonIncomeHistory"
