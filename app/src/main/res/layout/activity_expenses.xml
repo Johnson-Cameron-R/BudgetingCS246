@@ -161,9 +161,9 @@
     <com.github.aakira.expandablelayout.ExpandableRelativeLayout
         android:id="@+id/ShowHistoryExpenseLayout"
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="307dp"
         android:layout_below="@+id/buttonExpensesHistory"
-        android:layout_marginTop="0dp"
+        android:layout_marginTop="-12dp"
         android:padding="8dp"
         app:ael_duration="400"
         app:ael_expanded="true"
@@ -173,13 +173,13 @@
         tools:layout_editor_absoluteY="0dp">
 
         <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_width="403dp"
+            android:layout_height="301dp">
 
             <ListView
                 android:id="@+id/listViewExpensesHistory"
                 android:layout_width="393dp"
-                android:layout_height="369dp"
+                android:layout_height="match_parent"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
@@ -198,6 +198,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
         </RelativeLayout>
+
     </com.github.aakira.expandablelayout.ExpandableRelativeLayout>
 
     <Button
@@ -224,4 +225,34 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
+    <Button
+        android:id="@+id/ExpenseButtonGoals"
+        android:layout_width="120dp"
+        android:layout_height="65dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="45dp"
+        android:layout_marginRight="45dp"
+        android:layout_marginBottom="9dp"
+        android:text="Goals" />
+
+    <Button
+        android:id="@+id/ExpenseButtonIncome"
+        android:layout_width="120dp"
+        android:layout_height="65dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="43dp"
+        android:layout_marginLeft="43dp"
+        android:layout_marginEnd="80dp"
+        android:layout_marginRight="80dp"
+        android:layout_marginBottom="11dp"
+        android:onClick="openIncomePage"
+        android:layout_toStartOf="@+id/ExpenseButtonGoals"
+        android:layout_toLeftOf="@+id/ExpenseButtonGoals"
+        android:text="Income" />
+
 </RelativeLayout>
+

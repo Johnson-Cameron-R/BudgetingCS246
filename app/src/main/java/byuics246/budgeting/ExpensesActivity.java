@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
 
+//AdapterView.OnItemSelectedListener
 public class ExpensesActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private static final String TAG = "Expenses";
 
@@ -110,12 +111,28 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
         adapterCategories.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categoriesSpinner.setAdapter(adapterCategories);
         categoriesSpinner.setOnItemSelectedListener(this);
+
+        //Onclick for Navigation buttons
+        ////Handled by Layout XML
     }
 
 
     //******************************************************************************************************************************
     //UI functions
     //******************************************************************************************************************************
+    public void openIncomePage(View view) {
+        Log.d(TAG, "openIncomePage: In function");
+        Intent incomeIntent = new Intent(getApplicationContext(), IncomeActivity.class);
+        startActivity(incomeIntent);
+        finish();
+    }
+
+    public void openGoalsPage(View view) {
+        Intent goalsIntent = new Intent(this, MainActivity.class);
+        startActivity(goalsIntent);
+        finish();
+    }
+
     public void openAddNewExpenseWindow(View view) {
         expandableRelativeLayout = (ExpandableRelativeLayout) findViewById(R.id.AddNewExpenseLayout);
         expandableRelativeLayout.toggle();
@@ -144,15 +161,18 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
         category = parent.getItemAtPosition(position).toString();
         if (category.equals("Category")) {
             hasCategory = false;
+            Log.d(TAG, "onItemSelected: hasCategory is False");
         }
         else {
             hasCategory = true;
+            Log.d(TAG, "onItemSelected: hasCategory is True");
         }
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
         hasCategory = false;
+        Log.d(TAG, "onNothingSelected: HasCategory is False");
     }
 
     //***********************************************************************************
