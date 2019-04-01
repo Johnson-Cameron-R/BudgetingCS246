@@ -1,8 +1,12 @@
 package byuics246.budgeting;
 
+import android.Manifest;
 import android.app.DownloadManager;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,6 +27,7 @@ import jxl.write.WritableWorkbook;
 
 public class ReportsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private static final String TAG = "ReportsActivity";
+    int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE;
 
     String folder = "/Simple_Budgeting_files/";
     String file_name_inp = "Don't Change.xls";
@@ -61,6 +66,35 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         if (monthNumber != 0) {
 
             //request and check permissions
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                // Permission is not granted
+                // Should we show an explanation?
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    // Show an explanation to the user *asynchronously* -- don't block
+                    // this thread waiting for the user's response! After the user
+                    // sees the explanation, try again to request the permission.
+                } else {
+                    // No explanation needed; request the permission
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                }
+            } else {
+                // Permission has already been granted
+            }
+
+            if (!(MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE == PackageManager.PERMISSION_GRANTED))
+            {
+                Toast.makeText(this, "Make sure you add a writing memory permission to the app and try again",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+
+
 
 
 
