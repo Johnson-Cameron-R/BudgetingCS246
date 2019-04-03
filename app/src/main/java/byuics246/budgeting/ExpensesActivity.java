@@ -3,6 +3,8 @@ package byuics246.budgeting;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +18,10 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 
+import com.baoyz.swipemenulistview.SwipeMenu;
+import com.baoyz.swipemenulistview.SwipeMenuCreator;
+import com.baoyz.swipemenulistview.SwipeMenuItem;
+import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.github.aakira.expandablelayout.ExpandableRelativeLayout;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -37,7 +43,7 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     ExpandableRelativeLayout expandableRelativeLayout;
 
     //for history listView
-    ListView listView;
+    SwipeMenuListView listView;
     ArrayList <Transaction> listExpenses;
 
     //for add new expense
@@ -72,7 +78,7 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
         loginPrefsEditor = loginPreferences.edit();
 
         //activate a history list view
-        listView = (ListView) findViewById(R.id.listViewExpensesHistory);
+        listView = (SwipeMenuListView) findViewById(R.id.listViewExpensesHistory);
         listExpenses = new ArrayList<>();
 
         //get data from DB and add it to the viewer.
@@ -96,6 +102,65 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
                         }
                     }
                 });
+
+        //allow for deletion of list items
+        SwipeMenuCreator creator = new SwipeMenuCreator() {
+
+            @Override
+            public void create(SwipeMenu menu) {
+                // create "open" item
+                SwipeMenuItem openItem = new SwipeMenuItem(
+                        getApplicationContext());
+                // set item background
+                openItem.setBackground(new ColorDrawable(Color.rgb(0xC9, 0xC9,
+                        0xCE)));
+                // set item width
+                openItem.setWidth(170);
+                // set item title
+                openItem.setTitle("Open");
+                // set item title fontsize
+                openItem.setTitleSize(18);
+                // set item title font color
+                openItem.setTitleColor(Color.WHITE);
+                // add to menu
+                menu.addMenuItem(openItem);
+
+                // create "delete" item
+                SwipeMenuItem deleteItem = new SwipeMenuItem(
+                        getApplicationContext());
+                // set item background
+                deleteItem.setBackground(new ColorDrawable(Color.rgb(0xF9,
+                        0x3F, 0x25)));
+                // set item width
+                deleteItem.setWidth(170);
+                // set a icon
+                deleteItem.setIcon(R.drawable.ic_delete);
+                // add to menu
+                menu.addMenuItem(deleteItem);
+            }
+        };
+
+        // set creator
+        listView.setMenuCreator(creator);
+
+        listView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
+                switch (index) {
+                    case 0:
+                        // open
+                        break;
+                    case 1:
+                        // delete
+
+                        break;
+                }
+                // false : close the menu; true : not close the menu
+                return false;
+            }
+        });
+
+
 
         //activate add new expense fields
         newDate = findViewById(R.id.editTextExpensesNewDate);

@@ -176,7 +176,7 @@
             android:layout_width="403dp"
             android:layout_height="301dp">
 
-            <ListView
+            <com.baoyz.swipemenulistview.SwipeMenuListView
                 android:id="@+id/listViewExpensesHistory"
                 android:layout_width="393dp"
                 android:layout_height="match_parent"
