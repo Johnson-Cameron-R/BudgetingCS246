@@ -24,7 +24,6 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -86,7 +85,7 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 expenseData = document.getData();
-                                Transaction expense = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
+                                Transaction expense = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), Double.valueOf(expenseData.get("amount").toString()), expenseData.get("description").toString());
                                 listExpenses.add(expense);
                             }
                             expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
@@ -146,7 +145,7 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     public void addToList(View view) {
 
         if (validateForm()) {
-            Transaction example2 = new Transaction(newDate.getText().toString(), loginPreferences.getString("name", ""), category, generateCurrency(Double.valueOf(newAmount.getText().toString())),newDescription.getText().toString());////////////////////
+            Transaction example2 = new Transaction(newDate.getText().toString(), loginPreferences.getString("name", ""), category, Double.valueOf(newAmount.getText().toString()),newDescription.getText().toString());////////////////////
             expensesHistoryAdapter.add(example2);
             db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Expenses").add(example2);
         }
@@ -206,11 +205,6 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
         }
 
         return valid;
-    }
-
-    private String generateCurrency(Double number) {
-        NumberFormat format = NumberFormat.getCurrencyInstance();
-        return format.format(number);
     }
 
     public void reportsPage(View view) {

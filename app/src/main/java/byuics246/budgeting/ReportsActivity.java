@@ -157,9 +157,9 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
 //            b.setCategory(new CategoryToNumberConversion().translateCategory(b.getCategory()));
 //        }
 
-        incomes.add(new Transaction("03-17-2019", "user", "1", "400", "description"));
-        incomes.add(new Transaction("03-10-2019", "user", "2", "600", "description"));
-        incomes.add(new Transaction("03-10-2019", "user", "2", "125", "description"));
+        incomes.add(new Transaction("03-17-2019", "user", "1", 400.00, "description"));
+        incomes.add(new Transaction("03-10-2019", "user", "2", 600.00, "description"));
+        incomes.add(new Transaction("03-10-2019", "user", "2", 125.00, "description"));
 
         // Pull expences of the asked month and year
 
@@ -188,9 +188,9 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
 //        {
 //            b.setCategory(new CategoryToNumberConversion().translateCategory(b.getCategory()));
 //        }
-        expenses.add(new Transaction("03-17-2019", "user", "1", "100", "description"));
-        expenses.add(new Transaction("03-10-2019", "user", "2", "200", "description"));
-        expenses.add(new Transaction("03-10-2019", "user", "2", "300", "description"));
+        expenses.add(new Transaction("03-17-2019", "user", "1", 100.00, "description"));
+        expenses.add(new Transaction("03-10-2019", "user", "2", 200.00, "description"));
+        expenses.add(new Transaction("03-10-2019", "user", "2", 300.00, "description"));
 
         int startIncomesCategoriesCellY = 18 - 1;
         int startExpensesCategoriesCellY = 33 - 1;
@@ -265,7 +265,7 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
                 Date date=new SimpleDateFormat("MM-dd-yyyy").parse(ex.date);
                 int day = date.getDate();
                 int category = Integer.parseInt(ex.getCategory());
-                double amount = Double.parseDouble(ex.getAmount());
+                double amount = ex.getAmount();
                 // if there is a record for the same day for the same category, update its value to its original value + amount
                 boolean found = false;
                 CellNumberRecord crMatching = null;

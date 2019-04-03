@@ -50,7 +50,7 @@ class ThreeColumnsAdapter extends ArrayAdapter<Transaction> {
             first +=1;
         }
         String category = getItem(position).getCategory();
-        String amount = getItem(position). getAmount();
+        Double amount = getItem(position). getAmount();
         String user = getItem(position). getUser();
         String description = getItem(position). getDescription();
 

@@ -25,7 +25,6 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -87,7 +86,7 @@ public class IncomeActivity extends AppCompatActivity implements AdapterView.OnI
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 expenseData = document.getData();
-                                Transaction income = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
+                                Transaction income = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), Double.valueOf(expenseData.get("amount").toString()), expenseData.get("description").toString());
                                 listIncome.add(income);
                             }
                             IncomeHistoryAdapter = new ThreeColumnsAdapter(IncomeActivity.this, R.layout.three_columns_history_layout, listIncome);
@@ -144,7 +143,7 @@ public class IncomeActivity extends AppCompatActivity implements AdapterView.OnI
     public void addToList(View view) {
 
         if (validateForm()) {
-            Transaction incomeTransaction = new Transaction(newDate.getText().toString(), loginPreferences.getString("name", ""), source, generateCurrency(Double.valueOf(newAmount.getText().toString())),newDescription.getText().toString());////////////////////
+            Transaction incomeTransaction = new Transaction(newDate.getText().toString(), loginPreferences.getString("name", ""), source, Double.valueOf(newAmount.getText().toString()),newDescription.getText().toString());////////////////////
             IncomeHistoryAdapter.add(incomeTransaction);
             db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Income").add(incomeTransaction);
         }
@@ -201,11 +200,6 @@ public class IncomeActivity extends AppCompatActivity implements AdapterView.OnI
         }
 
         return valid;
-    }
-
-    private String generateCurrency(Double number) {
-        NumberFormat format = NumberFormat.getCurrencyInstance();
-        return format.format(number);
     }
 
     public void reportsPage(View view) {
