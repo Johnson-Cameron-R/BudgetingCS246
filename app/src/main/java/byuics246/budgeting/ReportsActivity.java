@@ -2,9 +2,11 @@ package byuics246.budgeting;
 
 import android.Manifest;
 import android.app.DownloadManager;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -16,16 +18,25 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
-import jxl.write.WritableWorkbook;
 
 public class ReportsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+    private FirebaseFirestore db;
+    private SharedPreferences loginPreferences;
     private static final String TAG = "ReportsActivity";
     int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE;
 
@@ -40,6 +51,9 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
     Spinner monthsSpinner;
     ArrayAdapter <CharSequence> adapterYears;
     Spinner yearsSpinner;
+
+    List <Transaction> expenses = new ArrayList<>();
+    List <Transaction> incomes = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +71,8 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         adapterYears.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         yearsSpinner.setAdapter(adapterYears);
         yearsSpinner.setOnItemSelectedListener(this);
+
+        db = FirebaseFirestore.getInstance();
     }
 
     public void requestReport(View view){
@@ -64,62 +80,36 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         file_name_out = month + year + ".xls";
         int monthNumber = new MonthStringToIntConverter(month).convert();
         if (monthNumber != 0) {
-
-            //request and check permissions
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-
-                // Permission is not granted
-                // Should we show an explanation?
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    // Show an explanation to the user *asynchronously* -- don't block
-                    // this thread waiting for the user's response! After the user
-                    // sees the explanation, try again to request the permission.
-                } else {
-                    // No explanation needed; request the permission
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                            MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-                }
-            } else {
-                // Permission has already been granted
-            }
-
-            if (!(MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE == PackageManager.PERMISSION_GRANTED))
-            {
-                Toast.makeText(this, "Make sure you add a writing memory permission to the app and try again",
+                    != PackageManager.PERMISSION_GRANTED){
+                Toast.makeText(this, "Make sure you add a writing memory permission to the app and try again.",
                         Toast.LENGTH_LONG).show();
-                return;
-            }
-
-
-
-
-
-            //create a directory
-            MyWritableWorkbook mywb = new MyWritableWorkbook();
-            int directoryStatus = mywb.checkDirectory(folder); // handle error messages // permissions
-            if (directoryStatus != 0) {
-                Toast.makeText(this, "Make sure you add a writing memory permission to the app and try again",
-                        Toast.LENGTH_LONG).show();
+                requestPermission();
             } else {
-                // download templete
-                downloadTemplete();
-                // create a copy of the templete
-                int creationResult = mywb.createCopyWorkbook(file_name_inp, file_name_out);
-                if (creationResult == 1) {
-                    Toast.makeText(this, "Make sure that excel reports in the app folder are closed and try again",
-                            Toast.LENGTH_LONG).show();
-                } else if (creationResult == 2) {
-                    Toast.makeText(this, "The templete is having issues downloading. Try again later",
+                //create a directory
+                MyWritableWorkbook mywb = new MyWritableWorkbook();
+                int directoryStatus = mywb.checkDirectory(folder); // handle error messages // permissions
+                if (directoryStatus != 0) {
+                    Toast.makeText(this, "Make sure you add a writing memory permission to the app and try again",
                             Toast.LENGTH_LONG).show();
                 } else {
-                    // fill in the report
-                    populateWorkbook(mywb, monthNumber);
-                    Toast.makeText(this, "File is saved in  internal storage/Simple_Budgeting_files/" + file_name_out + "!",
-                            Toast.LENGTH_LONG).show();
+                    // download templete
+                    downloadTemplete();
+                    // create a copy of the templete
+                    int creationResult = mywb.createCopyWorkbook(file_name_inp, file_name_out);
+                    if (creationResult == 1) {
+                        Toast.makeText(this, "Make sure that excel reports in the app folder are closed and try again",
+                                Toast.LENGTH_LONG).show();
+                    } else if (creationResult == 2) {
+                        Toast.makeText(this, "The templete is having issues downloading. Try again later",
+                                Toast.LENGTH_LONG).show();
+                    } else {
+                        // fill in the report
+                        populateWorkbook(mywb, monthNumber);
+                        Toast.makeText(this, "File is saved in  internal storage/Simple_Budgeting_files/" + file_name_out + "!",
+                                Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         }
@@ -138,16 +128,69 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         expensesGoals.add(new Goal("Education", "800", "2"));
 
         // Pull incomes of the asked month and year
-        List<Transaction> incomes =  new ArrayList<Transaction>();
-        incomes.add(new Transaction("03/17/2019", "user", "1", "400", "description"));
-        incomes.add(new Transaction("03/10/2019", "user", "2", "600", "description"));
-        incomes.add(new Transaction("03/10/2019", "user", "2", "125", "description"));
+
+
+
+        incomes =  new ArrayList<Transaction>();
+        //get data from DB and add it to the viewer.
+        //get data from DB and add it to the viewer.
+//        db.collection(loginPreferences.getString("email", "") + "/Budget/Income")
+//                .orderBy("date", Query.Direction.DESCENDING)
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                        Map<String, Object> expenseData;
+//                        if (task.isSuccessful()) {
+//                            for (QueryDocumentSnapshot document : task.getResult()) {
+//                                expenseData = document.getData();
+//                                Transaction income = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
+//                                incomes.add(income);
+//                            }
+//                        } else {
+//                            Log.d(TAG, "Error getting documents: ", task.getException());
+//                        }
+//                    }
+//                });
+//        for (Transaction b: incomes)
+//        {
+//            b.setCategory(new CategoryToNumberConversion().translateCategory(b.getCategory()));
+//        }
+
+        incomes.add(new Transaction("03-17-2019", "user", "1", "400", "description"));
+        incomes.add(new Transaction("03-10-2019", "user", "2", "600", "description"));
+        incomes.add(new Transaction("03-10-2019", "user", "2", "125", "description"));
 
         // Pull expences of the asked month and year
-        List<Transaction> expenses =  new ArrayList<Transaction>();
-        expenses.add(new Transaction("03/17/2019", "user", "1", "100", "description"));
-        expenses.add(new Transaction("03/10/2019", "user", "2", "200", "description"));
-        expenses.add(new Transaction("03/10/2019", "user", "2", "300", "description"));
+
+        expenses = new ArrayList<>();
+
+        //get data from DB and add it to the viewer.
+//        db.collection(loginPreferences.getString("email", "") + "/Budget/Expenses")
+//                .orderBy("date", Query.Direction.DESCENDING)
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                        Map<String, Object> expenseData;
+//                        if (task.isSuccessful()) {
+//                            for (QueryDocumentSnapshot document : task.getResult()) {
+//                                expenseData = document.getData();
+//                                Transaction expense = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
+//                                expenses.add(expense);
+//                            }
+//                        } else {
+//                            Log.d(TAG, "Error getting documents: ", task.getException());
+//                        }
+//                    }
+//                });
+//        for (Transaction b: expenses)
+//        {
+//            b.setCategory(new CategoryToNumberConversion().translateCategory(b.getCategory()));
+//        }
+        expenses.add(new Transaction("03-17-2019", "user", "1", "100", "description"));
+        expenses.add(new Transaction("03-10-2019", "user", "2", "200", "description"));
+        expenses.add(new Transaction("03-10-2019", "user", "2", "300", "description"));
 
         int startIncomesCategoriesCellY = 18 - 1;
         int startExpensesCategoriesCellY = 33 - 1;
@@ -219,7 +262,7 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         List <CellNumberRecord> cellNumberRecords = new ArrayList<>();
         for (Transaction ex : transactions) {
             try {
-                Date date=new SimpleDateFormat("MM/dd/yyyy").parse(ex.date);
+                Date date=new SimpleDateFormat("MM-dd-yyyy").parse(ex.date);
                 int day = date.getDate();
                 int category = Integer.parseInt(ex.getCategory());
                 double amount = Double.parseDouble(ex.getAmount());
@@ -270,4 +313,28 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         return cellNumberRecords;
     }
 
+    public void requestPermission(){
+        //request and check permissions
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            // Should we show an explanation?
+//            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+//                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+//                // Show an explanation to the user *asynchronously* -- don't block
+//                // this thread waiting for the user's response! After the user
+//                // sees the explanation, try again to request the permission.
+//            }else {
+
+            // No explanation needed; request the permission
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+//            }
+        } else {
+            // Permission has already been granted
+        }
+    }
 }
