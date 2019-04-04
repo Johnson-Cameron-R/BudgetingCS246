@@ -202,7 +202,7 @@
     </com.github.aakira.expandablelayout.ExpandableRelativeLayout>
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/IncomeButtonReports"
         android:layout_width="116dp"
         android:layout_height="64dp"
         android:layout_below="@+id/ShowHistoryExpenseLayout"
@@ -237,6 +237,7 @@
         android:layout_marginEnd="24dp"
         android:layout_marginRight="24dp"
         android:layout_marginBottom="9dp"
+        android:onClick="openGoalsPage"
         android:text="Goals" />
 
     <Button
