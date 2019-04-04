@@ -3,6 +3,8 @@ package byuics246.budgeting;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -15,7 +17,12 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
+import com.baoyz.swipemenulistview.SwipeMenu;
+import com.baoyz.swipemenulistview.SwipeMenuCreator;
+import com.baoyz.swipemenulistview.SwipeMenuItem;
+import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.github.aakira.expandablelayout.ExpandableRelativeLayout;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -25,9 +32,11 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 
 //AdapterView.OnItemSelectedListener
@@ -37,8 +46,10 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     ExpandableRelativeLayout expandableRelativeLayout;
 
     //for history listView
-    ListView listView;
+    SwipeMenuListView listView;
     ArrayList <Transaction> listExpenses;
+    int indexItemToDelete;
+    Transaction toDelete;
 
     //for add new expense
     private EditText newDate;
@@ -72,7 +83,7 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
         loginPrefsEditor = loginPreferences.edit();
 
         //activate a history list view
-        listView = (ListView) findViewById(R.id.listViewExpensesHistory);
+        listView = (SwipeMenuListView) findViewById(R.id.listViewExpensesHistory);
         listExpenses = new ArrayList<>();
 
         //get data from DB and add it to the viewer.
@@ -86,7 +97,8 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 expenseData = document.getData();
-                                Transaction expense = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
+                                String date = expenseData.get("date").toString();
+                                Transaction expense = new Transaction(date, expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
                                 listExpenses.add(expense);
                             }
                             expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
@@ -96,6 +108,117 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
                         }
                     }
                 });
+
+        //allow for deletion of list items
+        SwipeMenuCreator creator = new SwipeMenuCreator() {
+
+            @Override
+            public void create(SwipeMenu menu) {
+
+                // create "delete" item
+                SwipeMenuItem deleteItem = new SwipeMenuItem(
+                        getApplicationContext());
+                // set item background
+                deleteItem.setBackground(new ColorDrawable(Color.rgb(0xF9,
+                        0x3F, 0x25)));
+                // set item width
+                deleteItem.setWidth(170);
+                // set a icon
+                deleteItem.setIcon(R.drawable.ic_delete);
+                // add to menu
+                menu.addMenuItem(deleteItem);
+
+//                // create "open" item
+//                SwipeMenuItem openItem = new SwipeMenuItem(
+//                        getApplicationContext());
+//                // set item background
+//                openItem.setBackground(new ColorDrawable(Color.rgb(0xC9, 0xC9,
+//                        0xCE)));
+//                // set item width
+//                openItem.setWidth(170);
+//                // set item title
+//                openItem.setTitle("Open");
+//                // set item title fontsize
+//                openItem.setTitleSize(18);
+//                // set item title font color
+//                openItem.setTitleColor(Color.WHITE);
+//                // add to menu
+//                menu.addMenuItem(openItem);
+            }
+        };
+
+        // set creator
+        listView.setMenuCreator(creator);
+
+        listView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
+                indexItemToDelete = position;
+                switch (index) {
+                    case 0:
+                        // delete
+                        toDelete = listExpenses.get(position);
+                        String date = toDelete.getDate();
+                        String user = toDelete.getUser();
+                        String description = toDelete.getDescription();
+                        String category = toDelete.getCategory();
+                        String amount = toDelete.getAmount();
+//                        listExpenses.remove(position);
+//                        expensesHistoryAdapter.notifyDataSetChanged();
+                        db.collection(loginPreferences.getString("email", "") + "/Budget/Expenses")
+//                            .whereEqualTo("date", toDelete.getDate())
+//                            .whereEqualTo("user", toDelete.getUser())
+                                .whereEqualTo("amount", toDelete.getAmount())
+//                                .whereEqualTo("description", toDelete.getDescription())
+//                                .whereEqualTo("category", toDelete.getCategory())
+//                                .whereEqualTo("id", toDelete.getID())
+                            .orderBy("date", Query.Direction.DESCENDING)
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                    Map<String, Object> expenseData;
+                                    if (task.isSuccessful()) {
+                                        int numOfRecords = 0;
+                                        String docName = "";
+                                        for (QueryDocumentSnapshot document : task.getResult()) {
+                                            numOfRecords++;
+                                            expenseData = document.getData();
+                                            if (numOfRecords <=1) {
+                                                docName = document.getId();
+                                                String date = expenseData.get("date").toString();
+                                                Transaction expense = new Transaction(date, expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
+                                            }
+                                            else {
+                                                Log.d(TAG, "Multiple similar records: ");
+                                                break;
+                                            }
+                                        }
+                                        if (numOfRecords == 1)
+                                        {
+                                            db.collection(loginPreferences.getString("email", "") + "/Budget/Expenses")
+                                                    .document(docName).delete();
+                                        }
+                                        listExpenses.remove(indexItemToDelete);
+                                        expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
+                                        listView.setAdapter(expensesHistoryAdapter);
+                                    } else {
+                                        Log.d(TAG, "Error getting documents: ", task.getException());
+                                    }
+                                }
+                            });
+
+                        break;
+//                    case 1:
+//                        // open
+//                        break;
+                }
+                // false : close the menu; true : not close the menu
+                return false;
+            }
+        });
+
+
 
         //activate add new expense fields
         newDate = findViewById(R.id.editTextExpensesNewDate);
@@ -107,7 +230,7 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
 
         //activate a category spinner
         categoriesSpinner = findViewById(R.id.spinnerExpensesNewCategories);
-        adapterCategories = ArrayAdapter.createFromResource(this, R.array.Categories, android.R.layout.simple_spinner_item);
+        adapterCategories = ArrayAdapter.createFromResource(this, R.array.ExpensesCategories, android.R.layout.simple_spinner_item);
         adapterCategories.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categoriesSpinner.setAdapter(adapterCategories);
         categoriesSpinner.setOnItemSelectedListener(this);
@@ -146,9 +269,12 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     public void addToList(View view) {
 
         if (validateForm()) {
-            Transaction example2 = new Transaction(newDate.getText().toString(), loginPreferences.getString("name", ""), category, generateCurrency(Double.valueOf(newAmount.getText().toString())),newDescription.getText().toString());////////////////////
+            String dateToAdd = new Conversion().reformatDateForDB(newDate.getText().toString());
+            Transaction example2 = new Transaction(dateToAdd, loginPreferences.getString("name", ""), String.valueOf(new Conversion().ConvertCategory(category, getResources().getStringArray(R.array.ExpensesCategories))), newAmount.getText().toString(),newDescription.getText().toString());////////////////////
             expensesHistoryAdapter.add(example2);
             db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Expenses").add(example2);
+            Toast.makeText(this, "The expense has been added" ,
+                    Toast.LENGTH_LONG).show();
         }
     }
 
@@ -217,6 +343,7 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
         Intent reportsIntent = new Intent(this, ReportsActivity.class);
         startActivity(reportsIntent);
     }
+
 }
 
 

@@ -38,8 +38,6 @@ class ThreeColumnsAdapter extends ArrayAdapter<Transaction> {
     public View getView(int position, View convertView, ViewGroup parent) {
         convertView =  mLayoutInflater.inflate( mResourse, null );
 
-
-
         String date = getItem(position).getDate();
         if (date.equals("04/05/2019"))
         {
@@ -50,7 +48,7 @@ class ThreeColumnsAdapter extends ArrayAdapter<Transaction> {
             first +=1;
         }
         String category = getItem(position).getCategory();
-        String amount = getItem(position). getAmount();
+        String amount = String.valueOf(getItem(position). getAmount());
         String user = getItem(position). getUser();
         String description = getItem(position). getDescription();
 
@@ -64,8 +62,14 @@ class ThreeColumnsAdapter extends ArrayAdapter<Transaction> {
         TextView tvAmount= (TextView) convertView.findViewById(R.id.textViewExpensesHistoryCell3);
 
         tvDate.setText(date);
-        tvCategory.setText(category);
         tvAmount.setText(toString().valueOf(amount));
+        if (parent.getContext().getClass().getSimpleName().equals("ExpensesActivity")) {
+            tvCategory.setText(new Conversion().convertExpenseCategoryIDToString(Integer.valueOf(category), parent));
+        }
+        else if (parent.getContext().getClass().getSimpleName().equals("IncomeActivity")) {
+            tvCategory.setText(new Conversion().convertIncomeCategoryIDToString(Integer.valueOf(category), parent));
+        }
+
         return convertView;
     }
 }
