@@ -21,7 +21,6 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -35,8 +34,13 @@ import java.util.Map;
 
 
 public class ReportsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+    MyWritableWorkbook wb;
+
     private FirebaseFirestore db;
     private SharedPreferences loginPreferences;
+    private SharedPreferences.Editor loginPrefsEditor;
+
+
     private static final String TAG = "ReportsActivity";
     int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE;
 
@@ -45,6 +49,7 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
     String file_name_out = "Month.xls";
 
     String month;
+    String monthNumberString;
     String year;
 
     ArrayAdapter <CharSequence> adapterMonths;
@@ -52,8 +57,17 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
     ArrayAdapter <CharSequence> adapterYears;
     Spinner yearsSpinner;
 
+
+    int startIncomesCategoriesCellY = 18 - 1;
+    int startExpensesCategoriesCellY = 33 - 1;
+    int startExpensesIncomesCategoriesCellX = 0 - 1; // names of goals
+    int startExpensesIncomesGoalsCellX = 1 - 1; // amount of goals
+    int startExpensesIncomesCellsX = 4 - 1;
+    List <Goal> incomesGoals = new ArrayList<>();
+    List <Goal> expensesGoals = new ArrayList<>();
     List <Transaction> expenses = new ArrayList<>();
     List <Transaction> incomes = new ArrayList<>();
+    List <CellNumberRecord> cellNumberRecords = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,12 +87,17 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         yearsSpinner.setOnItemSelectedListener(this);
 
         db = FirebaseFirestore.getInstance();
+
+        //activate LoginPrefs
+        loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        loginPrefsEditor = loginPreferences.edit();
     }
 
     public void requestReport(View view){
         // Pull data from web elements
         file_name_out = month + year + ".xls";
-        int monthNumber = new MonthStringToIntConverter(month).convert();
+        int monthNumber = new Conversion().convertMonthToInt(month, getResources().getStringArray(R.array.Months));
+
         if (monthNumber != 0) {
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -95,19 +114,22 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
                             Toast.LENGTH_LONG).show();
                 } else {
                     // download templete
-                    downloadTemplete();
-                    // create a copy of the templete
-                    int creationResult = mywb.createCopyWorkbook(file_name_inp, file_name_out);
-                    if (creationResult == 1) {
-                        Toast.makeText(this, "Make sure that excel reports in the app folder are closed and try again",
-                                Toast.LENGTH_LONG).show();
-                    } else if (creationResult == 2) {
-                        Toast.makeText(this, "The templete is having issues downloading. Try again later",
-                                Toast.LENGTH_LONG).show();
-                    } else {
-                        // fill in the report
-                        populateWorkbook(mywb, monthNumber);
-                        Toast.makeText(this, "File is saved in  internal storage/Simple_Budgeting_files/" + file_name_out + "!",
+                    if (downloadTemplete()) {
+                        // create a copy of the templete
+                        int creationResult = mywb.createCopyWorkbook(file_name_inp, file_name_out);
+                        if (creationResult == 1) {
+                            Toast.makeText(this, "Make sure that excel reports in the app folder are closed and try again",
+                                    Toast.LENGTH_LONG).show();
+                        } else if (creationResult == 2) {
+                            Toast.makeText(this, "The templete is having issues downloading. Try again later",
+                                    Toast.LENGTH_LONG).show();
+                        } else {
+                            // fill in the report
+                            populateWorkbook(mywb, monthNumber);
+                        }
+                    }
+                    else{
+                        Toast.makeText(this, "Templete hasn't been properly downloaded. Check internet connection and try again" ,
                                 Toast.LENGTH_LONG).show();
                     }
                 }
@@ -116,103 +138,81 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
     }
 
     private void populateWorkbook(MyWritableWorkbook mywb, int monthNumber) {
-        //Pull income goals categories and values
-        List <Goal> incomesGoals = new ArrayList<>();
-        incomesGoals.add(new Goal("job1", "500", "1"));
-        incomesGoals.add(new Goal("job2", "600", "2"));
+        wb = mywb;
+        monthNumberString = "";
+        if (monthNumber < 10)
+            monthNumberString+="0";
+        monthNumberString+=String.valueOf(monthNumber);
+
+        //Pull amount goals categories and values
+        incomesGoals.add(new Goal("Navex", "500", "1"));
+        incomesGoals.add(new Goal("BYUI", "600", "2"));
 
 
         //Pull expenses goals categories and values
-        List <Goal> expensesGoals = new ArrayList<>();
         expensesGoals.add(new Goal("Inactive Savings", "700", "1"));
         expensesGoals.add(new Goal("Education", "800", "2"));
 
-        // Pull incomes of the asked month and year
-
-
-
-        incomes =  new ArrayList<Transaction>();
-        //get data from DB and add it to the viewer.
-        //get data from DB and add it to the viewer.
-//        db.collection(loginPreferences.getString("email", "") + "/Budget/Income")
-//                .orderBy("date", Query.Direction.DESCENDING)
-//                .get()
-//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//                        Map<String, Object> expenseData;
-//                        if (task.isSuccessful()) {
-//                            for (QueryDocumentSnapshot document : task.getResult()) {
-//                                expenseData = document.getData();
-//                                Transaction income = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
-//                                incomes.add(income);
+        //Pull incomes of the asked month and year
+        db.collection(loginPreferences.getString("email", "") + "/Budget/Income")
+                .whereGreaterThanOrEqualTo("date", year + "-" + monthNumberString + "-01")
+                .whereLessThan("date", year + "-" + monthNumberString + "-31")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        Map<String, Object> expenseData;
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                expenseData = document.getData();
+                                Transaction amount = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
+                                incomes.add(amount);
+                            }
+//                            for (Transaction b: incomes)
+//                            {
+//                                b.setCategory(String.valueOf(new Conversion().ConvertCategory(b.getCategory(), getResources().getStringArray(R.array.IncomeCategories))));
 //                            }
-//                        } else {
-//                            Log.d(TAG, "Error getting documents: ", task.getException());
-//                        }
-//                    }
-//                });
-//        for (Transaction b: incomes)
-//        {
-//            b.setCategory(new CategoryToNumberConversion().translateCategory(b.getCategory()));
-//        }
+                            cellNumberRecords.addAll(getRecords(incomes, startExpensesIncomesCellsX, startIncomesCategoriesCellY));
+                            db.collection(loginPreferences.getString("email", "") + "/Budget/Expenses")
+                                    .whereGreaterThanOrEqualTo("date", year + "-" + monthNumberString + "-01")
+                                    .whereLessThan("date", year + "-" + monthNumberString + "-31")
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            Map<String, Object> expenseData;
+                                            if (task.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                                    expenseData = document.getData();
+                                                    String date = expenseData.get("date").toString();
+                                                    Transaction expense = new Transaction(date, expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
+                                                    expenses.add(expense);
+                                                }
+                                                cellNumberRecords.addAll(getRecords(expenses, startExpensesIncomesCellsX, startExpensesCategoriesCellY));
+                                                cellNumberRecords.addAll(getGoalRecordsNumber(expensesGoals, startExpensesIncomesGoalsCellX, startExpensesCategoriesCellY));
+                                                cellNumberRecords.addAll(getGoalRecordsNumber(incomesGoals, startExpensesIncomesGoalsCellX, startIncomesCategoriesCellY));
 
-        incomes.add(new Transaction("03-17-2019", "user", "1", "400", "description"));
-        incomes.add(new Transaction("03-10-2019", "user", "2", "600", "description"));
-        incomes.add(new Transaction("03-10-2019", "user", "2", "125", "description"));
+                                                List <CellStringRecord> cellStringRecords = new ArrayList<>();
+                                                cellStringRecords.addAll(getGoalRecordsString(expensesGoals, startExpensesIncomesCategoriesCellX, startExpensesCategoriesCellY));
+                                                cellStringRecords.addAll(getGoalRecordsString(incomesGoals, startExpensesIncomesCategoriesCellX, startIncomesCategoriesCellY));
 
-        // Pull expences of the asked month and year
+                                                //Update excel
+                                                wb.updateSheet(0, cellNumberRecords, cellStringRecords);
+                                                wb.close();
+                                                Toast.makeText(getBaseContext(), "File is saved in  internal storage/Simple_Budgeting_files/" + file_name_out + "!",
+                                                        Toast.LENGTH_LONG).show();
+                                            } else {
+                                                Log.d(TAG, "Error getting documents: ", task.getException());
+                                            }
+                                        }
+                                    });
 
-        expenses = new ArrayList<>();
 
-        //get data from DB and add it to the viewer.
-//        db.collection(loginPreferences.getString("email", "") + "/Budget/Expenses")
-//                .orderBy("date", Query.Direction.DESCENDING)
-//                .get()
-//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//                        Map<String, Object> expenseData;
-//                        if (task.isSuccessful()) {
-//                            for (QueryDocumentSnapshot document : task.getResult()) {
-//                                expenseData = document.getData();
-//                                Transaction expense = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
-//                                expenses.add(expense);
-//                            }
-//                        } else {
-//                            Log.d(TAG, "Error getting documents: ", task.getException());
-//                        }
-//                    }
-//                });
-//        for (Transaction b: expenses)
-//        {
-//            b.setCategory(new CategoryToNumberConversion().translateCategory(b.getCategory()));
-//        }
-        expenses.add(new Transaction("03-17-2019", "user", "1", "100", "description"));
-        expenses.add(new Transaction("03-10-2019", "user", "2", "200", "description"));
-        expenses.add(new Transaction("03-10-2019", "user", "2", "300", "description"));
-
-        int startIncomesCategoriesCellY = 18 - 1;
-        int startExpensesCategoriesCellY = 33 - 1;
-        int startExpensesIncomesCategoriesCellX = 0 - 1; // names of goals
-        int startExpensesIncomesGoalsCellX = 1 - 1; // amount of goals
-        int startExpensesIncomesCellsX = 4 - 1;
-
-        // create Cell records
-        List <CellNumberRecord> cellNumberRecords = new ArrayList<>();
-        cellNumberRecords.addAll(getRecords(incomes, startExpensesIncomesCellsX, startIncomesCategoriesCellY));
-        cellNumberRecords.addAll(getRecords(expenses, startExpensesIncomesCellsX, startExpensesCategoriesCellY));
-        cellNumberRecords.addAll(getGoalRecordsNumber(expensesGoals, startExpensesIncomesGoalsCellX, startExpensesCategoriesCellY));
-        cellNumberRecords.addAll(getGoalRecordsNumber(incomesGoals, startExpensesIncomesGoalsCellX, startIncomesCategoriesCellY));
-
-        List <CellStringRecord> cellStringRecords = new ArrayList<>();
-        cellStringRecords.addAll(getGoalRecordsString(expensesGoals, startExpensesIncomesCategoriesCellX, startExpensesCategoriesCellY));
-        cellStringRecords.addAll(getGoalRecordsString(incomesGoals, startExpensesIncomesCategoriesCellX, startIncomesCategoriesCellY));
-
-        //Update excel
-        mywb.updateSheet(0, cellNumberRecords, cellStringRecords);
-        mywb.close();
-
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
     }
 
 
@@ -223,8 +223,9 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
     {
         File sdCard = Environment.getExternalStorageDirectory();
         File file = new File(sdCard.getAbsolutePath() + folder +file_name_inp);
-        if(!file.exists()){
-            DownloadManager.Request request=new DownloadManager.Request(Uri.parse("https://github.com/inessae/Excel-report-tamplete/blob/master/Tamplete.xls?raw=true"))
+        if(!file.exists()) {
+            try {
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse("https://github.com/inessae/Excel-report-tamplete/raw/master/Tamplete.xls"))
                     .setTitle(file_name_inp)// Title of the Download Notification
                     .setDescription("Downloading")// Description of the Download Notification
                     .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)// Visibility of the download Notification
@@ -233,8 +234,13 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
 //                .setAllowedOverMetered(true)// Set if download is allowed on Mobile network
 //                .setVisibleInDownloadsUi(false);
                     .setAllowedOverRoaming(true);// Set if download is allowed on roaming network
-            DownloadManager downloadManager= (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+            DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
             downloadManager.enqueue(request);// enqueue puts the download request in the queue.
+            }
+            catch (Exception e){
+                Log.d(TAG, "File wasn't created. Check internet connection");
+                return false;
+            }
         }
         return true;
     }
@@ -262,7 +268,7 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         List <CellNumberRecord> cellNumberRecords = new ArrayList<>();
         for (Transaction ex : transactions) {
             try {
-                Date date=new SimpleDateFormat("MM-dd-yyyy").parse(ex.date);
+                Date date=new SimpleDateFormat("yyyy-MM-dd").parse(ex.date);
                 int day = date.getDate();
                 int category = Integer.parseInt(ex.getCategory());
                 double amount = Double.parseDouble(ex.getAmount());

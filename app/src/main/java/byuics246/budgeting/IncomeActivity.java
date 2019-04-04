@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.github.aakira.expandablelayout.ExpandableRelativeLayout;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -108,7 +109,7 @@ public class IncomeActivity extends AppCompatActivity implements AdapterView.OnI
 
         //activate a category spinner
         categoriesSpinner = findViewById(R.id.spinnerIncomeNewCategories);
-        adapterCategories = ArrayAdapter.createFromResource(this, R.array.Sources, android.R.layout.simple_spinner_item);
+        adapterCategories = ArrayAdapter.createFromResource(this, R.array.IncomeCategories, android.R.layout.simple_spinner_item);
         adapterCategories.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categoriesSpinner.setAdapter(adapterCategories);
         categoriesSpinner.setOnItemSelectedListener(this);
@@ -144,9 +145,12 @@ public class IncomeActivity extends AppCompatActivity implements AdapterView.OnI
     public void addToList(View view) {
 
         if (validateForm()) {
-            Transaction incomeTransaction = new Transaction(newDate.getText().toString(), loginPreferences.getString("name", ""), source, generateCurrency(Double.valueOf(newAmount.getText().toString())),newDescription.getText().toString());////////////////////
+            String dateToAdd = new Conversion().reformatDateForDB(newDate.getText().toString());
+            Transaction incomeTransaction = new Transaction(dateToAdd, loginPreferences.getString("name", ""), String.valueOf(new Conversion().ConvertCategory(source, getResources().getStringArray(R.array.IncomeCategories))), newAmount.getText().toString(),newDescription.getText().toString());////////////////////
             IncomeHistoryAdapter.add(incomeTransaction);
             db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Income").add(incomeTransaction);
+            Toast.makeText(this, "The income has been added" ,
+                    Toast.LENGTH_LONG).show();
         }
     }
 

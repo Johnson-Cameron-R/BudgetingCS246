@@ -1,15 +1,27 @@
 <resources>
-    <string name="app_name">Budgetingcs246</string>
-    <string-array name="Categories">
+    <string-array name="ExpensesCategories">
         <item>Category</item>
-        <item>Grocieries</item>
+        <item>Tithing</item>
+        <item>Savings</item>
+        <item>Housing</item>
+        <item>Health Insurance</item>
+        <item>Car Insurance</item>
+        <item>Phone</item>
+        <item>Netflix</item>
+        <item>Amazon Prime</item>
+        <item>Food and stuff</item>
         <item>Gas</item>
+        <item>Eating Out</item>
+        <item>Extra Thayne</item>
+        <item>Extra Inessa</item>
     </string-array>
 
-    <string-array name="Sources">
+    <string-array name="IncomeCategories">
         <item>Source</item>
+        <item>Welding</item>
         <item>Navex</item>
-        <item>BYUI</item>
+        <item>Other Thayne</item>
+        <item>Other Inessa</item>
     </string-array>
 
     <string-array name="Months">
