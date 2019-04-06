@@ -50,6 +50,8 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     ArrayList <Transaction> listExpenses;
     int indexItemToDelete;
     Transaction toDelete;
+    Transaction expenseToAdd;
+    boolean additionCompleted = false;
 
     //for add new expense
     private EditText newDate;
@@ -149,6 +151,14 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
         listView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
+//                while(!additionCompleted)
+//                {
+//                    try {
+//                        Thread.sleep(1000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
                 indexItemToDelete = position;
                 switch (index) {
                     case 0:
@@ -258,13 +268,26 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     public void addToList(View view) {
 
         if (validateForm()) {
+            additionCompleted = false;
             String dateToAdd = new Conversion().reformatDateForDB(newDate.getText().toString());
-            Transaction expense = new Transaction(dateToAdd, loginPreferences.getString("name", ""), String.valueOf(new Conversion().ConvertCategory(category, getResources().getStringArray(R.array.ExpensesCategories))), newAmount.getText().toString(),newDescription.getText().toString(), new Utilities().randomString());////////////////////
-            listExpenses.add(expense);
-            expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
-            listView.setAdapter(expensesHistoryAdapter);
+            expenseToAdd = new Transaction(dateToAdd, loginPreferences.getString("name", ""), String.valueOf(new Conversion().ConvertCategory(category, getResources().getStringArray(R.array.ExpensesCategories))), newAmount.getText().toString(),newDescription.getText().toString(), new Utilities().randomString());////////////////////
 
-            db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Expenses").add(expense);
+            db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Expenses")
+                    .add(expenseToAdd)
+//                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                        @Override
+//                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                            if (task.isSuccessful()) {
+//                                listExpenses.add(expenseToAdd);
+//                                expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
+//                                listView.setAdapter(expensesHistoryAdapter);
+//                                additionCompleted = true;
+//                            } else {
+//                                Log.d(TAG, "Error writing documents: ", task.getException());
+//                            }
+//                        }
+//                    })
+            ;
             Toast.makeText(this, "The expense has been added" ,
                     Toast.LENGTH_LONG).show();
         }
