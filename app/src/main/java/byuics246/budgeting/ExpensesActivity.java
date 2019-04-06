@@ -271,6 +271,9 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
             additionCompleted = false;
             String dateToAdd = new Conversion().reformatDateForDB(newDate.getText().toString());
             expenseToAdd = new Transaction(dateToAdd, loginPreferences.getString("name", ""), String.valueOf(new Conversion().ConvertCategory(category, getResources().getStringArray(R.array.ExpensesCategories))), newAmount.getText().toString(),newDescription.getText().toString(), new Utilities().randomString());////////////////////
+            listExpenses.add(expenseToAdd);
+            expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
+            listView.setAdapter(expensesHistoryAdapter);
 
             db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Expenses")
                     .add(expenseToAdd)
@@ -288,6 +291,7 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
 //                        }
 //                    })
             ;
+
             Toast.makeText(this, "The expense has been added" ,
                     Toast.LENGTH_LONG).show();
         }
