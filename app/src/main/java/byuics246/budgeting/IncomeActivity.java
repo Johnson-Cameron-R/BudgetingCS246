@@ -207,7 +207,7 @@ public class IncomeActivity extends AppCompatActivity implements AdapterView.OnI
         //// onclick assignment handled in XML of layout
     }
 
-    
+
 
     public void openAddNewIncomeWindow(View view) {
         expandableRelativeLayout = (ExpandableRelativeLayout) findViewById(R.id.AddNewIncomeLayout);
