@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -25,18 +24,19 @@ import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.github.aakira.expandablelayout.ExpandableRelativeLayout;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Map;
 
 //AdapterView.OnItemSelectedListener
@@ -51,7 +51,6 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     int indexItemToDelete;
     Transaction toDelete;
     Transaction expenseToAdd;
-    boolean additionCompleted = false;
 
     //for add new expense
     private EditText newDate;
@@ -151,62 +150,28 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
         listView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
-//                while(!additionCompleted)
-//                {
-//                    try {
-//                        Thread.sleep(1000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
                 indexItemToDelete = position;
                 switch (index) {
                     case 0:
                         // delete
                         toDelete = listExpenses.get(position);
-                        String date = toDelete.getDate();
-                        String user = toDelete.getUser();
-                        String description = toDelete.getDescription();
-                        String category = toDelete.getCategory();
-                        String amount = toDelete.getAmount();
-                        db = FirebaseFirestore.getInstance();
-                        db.collection(loginPreferences.getString("email", "") + "/Budget/Expenses")
-                                .whereEqualTo("id", toDelete.getId())
-                            .orderBy("date", Query.Direction.DESCENDING)
-                            .get()
-                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                @Override
-                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                    Map<String, Object> expenseData;
-                                    if (task.isSuccessful()) {
-                                        int numOfRecords = 0;
-                                        String docName = "";
-                                        for (QueryDocumentSnapshot document : task.getResult()) {
-                                            numOfRecords++;
-                                            expenseData = document.getData();
-                                            if (numOfRecords <=1) {
-                                                docName = document.getId();
-                                                String date = expenseData.get("date").toString();
-                                            }
-                                            else {
-                                                Log.d(TAG, "Multiple similar records: ");
-                                                break;
-                                            }
-                                        }
-                                        if (numOfRecords == 1)
-                                        {
-                                            db.collection(loginPreferences.getString("email", "") + "/Budget/Expenses")
-                                                    .document(docName).delete();
-                                        }
+                        db.collection(loginPreferences.getString("email", "") + "/Budget/Expenses").document(toDelete.getId())
+                                .delete()
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Log.d(TAG, "DocumentSnapshot successfully deleted!");
                                         listExpenses.remove(indexItemToDelete);
                                         expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
                                         listView.setAdapter(expensesHistoryAdapter);
-                                    } else {
-                                        Log.d(TAG, "Error getting documents: ", task.getException());
                                     }
-                                }
-                            });
-
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.w(TAG, "Error deleting document", e);
+                                    }
+                                });
                         break;
 //                    case 1:
 //                        // open
@@ -216,8 +181,6 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
                 return false;
             }
         });
-
-
 
         //activate add new expense fields
         newDate = findViewById(R.id.editTextExpensesNewDate);
@@ -268,35 +231,33 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     public void addToList(View view) {
 
         if (validateForm()) {
-            additionCompleted = false;
+//            additionCompleted = false;
             String dateToAdd = new Conversion().reformatDateForDB(newDate.getText().toString());
-            expenseToAdd = new Transaction(dateToAdd, loginPreferences.getString("name", ""), String.valueOf(new Conversion().ConvertCategory(category, getResources().getStringArray(R.array.ExpensesCategories))), newAmount.getText().toString(),newDescription.getText().toString(), new Utilities().randomString());////////////////////
-            listExpenses.add(expenseToAdd);
-            expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
-            listView.setAdapter(expensesHistoryAdapter);
-
+            expenseToAdd = new Transaction(dateToAdd, loginPreferences.getString("name", ""), String.valueOf(new Conversion().ConvertCategory(category, getResources().getStringArray(R.array.ExpensesCategories))), newAmount.getText().toString(),newDescription.getText().toString(), "tempString");
             db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Expenses")
                     .add(expenseToAdd)
-//                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//                        @Override
-//                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//                            if (task.isSuccessful()) {
-//                                listExpenses.add(expenseToAdd);
-//                                expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
-//                                listView.setAdapter(expensesHistoryAdapter);
-//                                additionCompleted = true;
-//                            } else {
-//                                Log.d(TAG, "Error writing documents: ", task.getException());
-//                            }
-//                        }
-//                    })
-            ;
-
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            expenseToAdd.setId(documentReference.getId());
+                            Log.d(TAG, "onSuccess: ID = " + expenseToAdd.getId());
+                            db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Expenses").document(documentReference.getId())
+                                    .set(expenseToAdd);
+                            listExpenses.add(expenseToAdd);
+                            expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
+                            listView.setAdapter(expensesHistoryAdapter);
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d(TAG, "Error writing documents: ", e);
+                        }
+                    });
             Toast.makeText(this, "The expense has been added" ,
                     Toast.LENGTH_LONG).show();
         }
     }
-
 
     //***********************************************************************************
     //Spinner functions

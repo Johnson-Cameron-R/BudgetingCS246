@@ -65,13 +65,14 @@ public class Transaction {
         return id;
     }
 
-    public Transaction(String date, String user, String category, String amount, String description, String id) {
-        this.date = date;
-        this.user = user;
-        this.category = category;
+    public void setId(String id) { this.id = id; }
 
-        this.amount = amount;
+    public Transaction(String date, String user, String category, String amount, String description, String id) {
+        this.date        = date;
+        this.user        = user;
+        this.category    = category;
+        this.amount      = amount;
         this.description = description;
-        this.id = id;
+        this.id          = id;
     }
 }

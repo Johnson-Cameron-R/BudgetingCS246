@@ -14,9 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -26,7 +24,10 @@ import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.github.aakira.expandablelayout.ExpandableRelativeLayout;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -153,49 +154,23 @@ public class IncomeActivity extends AppCompatActivity implements AdapterView.OnI
                     case 0:
                         // delete
                         toDelete = listIncomes.get(position);
-                        String date = toDelete.getDate();
-                        String user = toDelete.getUser();
-                        String description = toDelete.getDescription();
-                        String category = toDelete.getCategory();
-                        String amount = toDelete.getAmount();
-                        db = FirebaseFirestore.getInstance();
-                        db.collection(loginPreferences.getString("email", "") + "/Budget/Income")
-                                .whereEqualTo("id", toDelete.getId())
-                                .orderBy("date", Query.Direction.DESCENDING)
-                                .get()
-                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        db.collection(loginPreferences.getString("email", "") + "/Budget/Income").document(toDelete.getId())
+                                .delete()
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
-                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                        Map<String, Object> expenseData;
-                                        if (task.isSuccessful()) {
-                                            int numOfRecords = 0;
-                                            String docName = "";
-                                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                                numOfRecords++;
-                                                expenseData = document.getData();
-                                                if (numOfRecords <=1) {
-                                                    docName = document.getId();
-                                                    String date = expenseData.get("date").toString();
-                                                }
-                                                else {
-                                                    Log.d(TAG, "Multiple similar records: ");
-                                                    break;
-                                                }
-                                            }
-                                            if (numOfRecords == 1)
-                                            {
-                                                db.collection(loginPreferences.getString("email", "") + "/Budget/Incomes")
-                                                        .document(docName).delete();
-                                            }
-                                            listIncomes.remove(indexItemToDelete);
-                                            incomeHistoryAdapter = new ThreeColumnsAdapter(IncomeActivity.this, R.layout.three_columns_history_layout, listIncomes);
-                                            listView.setAdapter(incomeHistoryAdapter);
-                                        } else {
-                                            Log.d(TAG, "Error getting documents: ", task.getException());
-                                        }
+                                    public void onSuccess(Void aVoid) {
+                                        Log.d(TAG, "DocumentSnapshot successfully deleted!");
+                                        listIncomes.remove(indexItemToDelete);
+                                        incomeHistoryAdapter = new ThreeColumnsAdapter(IncomeActivity.this, R.layout.three_columns_history_layout, listIncomes);
+                                        listView.setAdapter(incomeHistoryAdapter);
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.w(TAG, "Error deleting document", e);
                                     }
                                 });
-
                         break;
 //                    case 1:
 //                        // open
@@ -253,12 +228,29 @@ public class IncomeActivity extends AppCompatActivity implements AdapterView.OnI
 
         if (validateForm()) {
             String dateToAdd = new Conversion().reformatDateForDB(newDate.getText().toString());
-            Transaction income = new Transaction(dateToAdd, loginPreferences.getString("name", ""), String.valueOf(new Conversion().ConvertCategory(source, getResources().getStringArray(R.array.IncomeCategories))), newAmount.getText().toString(),newDescription.getText().toString(), new Utilities().randomString());////////////////////
-            listIncomes.add(income);
-            incomeHistoryAdapter = new ThreeColumnsAdapter(IncomeActivity.this, R.layout.three_columns_history_layout, listIncomes);
-            listView.setAdapter(incomeHistoryAdapter);
+            final Transaction income = new Transaction(dateToAdd, loginPreferences.getString("name", ""), String.valueOf(new Conversion().ConvertCategory(source, getResources().getStringArray(R.array.IncomeCategories))), newAmount.getText().toString(),newDescription.getText().toString(), new Utilities().randomString());////////////////////
 
-            db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Income").add(income);
+            db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Income")
+                    .add(income)
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            income.setId(documentReference.getId());
+                            Log.d(TAG, "onSuccess: ID = " + income.getId());
+                            db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Income").document(documentReference.getId())
+                                    .set(income);
+                            listIncomes.add(income);
+                            incomeHistoryAdapter = new ThreeColumnsAdapter(IncomeActivity.this, R.layout.three_columns_history_layout, listIncomes);
+                            listView.setAdapter(incomeHistoryAdapter);
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d(TAG, "Error writing documents: ", e);
+                        }
+                    });
+
             Toast.makeText(this, "The income has been added" ,
                     Toast.LENGTH_LONG).show();
         }
