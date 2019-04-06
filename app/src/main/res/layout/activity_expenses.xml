@@ -1,259 +1,240 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawerLayoutExpenses"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ExpensesActivity">
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start">
 
-    <TextView
-        android:id="@+id/textViewRegisterTitle2"
-        android:layout_width="277dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:text="Expenses"
-        android:textAlignment="center"
-        android:textColor="@color/colorBlack"
-        android:textSize="32sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/buttonExpensesAddNew"
-        android:layout_width="393dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginRight="15dp"
-        android:drawableRight="@android:drawable/arrow_up_float"
-        android:onClick="openAddNewExpenseWindow"
-        android:text="Add an expense"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewRegisterTitle2" />
 
-    <com.github.aakira.expandablelayout.ExpandableRelativeLayout
-        android:id="@+id/AddNewExpenseLayout"
+
+    <FrameLayout
+        android:id="@+id/frameLayoutExpenses"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/buttonExpensesAddNew"
-        android:layout_marginTop="0dp"
-        android:padding="8dp"
-        app:ael_duration="400"
-        app:ael_expanded="true"
-        app:ael_interpolator="accelerate"
-        app:ael_orientation="vertical"
-        tools:layout_editor_absoluteX="44dp"
-        tools:layout_editor_absoluteY="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/buttonExpensesAddNew">
+        android:layout_height="match_parent">
 
-        <android.support.constraint.ConstraintLayout
-            android:layout_width="wrap_content"
-            android:layout_height="218dp">
-
-            <EditText
-                android:id="@+id/editTextExpensesNewDate"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginEnd="20dp"
-                android:layout_marginRight="20dp"
-                android:ems="10"
-                android:hint="Date"
-                android:inputType="date"
-                app:layout_constraintEnd_toStartOf="@+id/editTextExpensesNewAmount"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <EditText
-                android:id="@+id/editTextExpensesNewAmount"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginRight="8dp"
-                android:ems="10"
-                android:hint="Amount"
-                android:inputType="numberDecimal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/editTextExpensesNewDate"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <EditText
-                android:id="@+id/editTextExpensesNEwDescription"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginRight="8dp"
-                android:ems="10"
-                android:hint="Description"
-                android:inputType="textPersonName"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/spinnerExpensesNewCategories" />
-
-            <Button
-                android:id="@+id/buttonExpensesNewAdd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="157dp"
-                android:layout_marginLeft="157dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="157dp"
-                android:layout_marginRight="157dp"
-                android:onClick="addToList"
-                android:text="Add"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editTextExpensesNEwDescription" />
-
-            <Spinner
-                android:id="@+id/spinnerExpensesNewCategories"
-                android:layout_width="352dp"
-                android:layout_height="40dp"
-                android:layout_marginTop="56dp"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:layout_editor_absoluteX="8dp" />
-
-
-        </android.support.constraint.ConstraintLayout>
-    </com.github.aakira.expandablelayout.ExpandableRelativeLayout>
-
-
-
-    <Button
-        android:id="@+id/buttonExpensesHistory"
-        android:layout_width="393dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:drawableRight="@android:drawable/arrow_up_float"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:onClick="showHistory"
-        android:text="Show history"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_below="@+id/AddNewExpenseLayout"
-        />
-
-    <com.github.aakira.expandablelayout.ExpandableRelativeLayout
-        android:id="@+id/ShowHistoryExpenseLayout"
-        android:layout_width="match_parent"
-        android:layout_height="309dp"
-        android:layout_below="@+id/buttonExpensesHistory"
-        android:layout_marginTop="-12dp"
-        android:padding="8dp"
-        app:ael_duration="400"
-        app:ael_expanded="true"
-        app:ael_interpolator="accelerate"
-        app:ael_orientation="vertical"
-        tools:layout_editor_absoluteX="44dp"
-        tools:layout_editor_absoluteY="0dp">
 
         <RelativeLayout
-            android:layout_width="403dp"
-            android:layout_height="301dp">
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".ExpensesActivity">
 
-            <com.baoyz.swipemenulistview.SwipeMenuListView
-                android:id="@+id/listViewExpensesHistory"
-                android:layout_width="393dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="0dp"
-                android:layout_marginLeft="0dp"
-                android:layout_marginTop="0dp"
-                android:layout_marginEnd="1dp"
-                android:layout_marginRight="1dp"
-                android:layout_marginBottom="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
+            <TextView
+                android:id="@+id/textViewRegisterTitle2"
+                android:layout_width="277dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:text="Expenses"
+                android:textAlignment="center"
+                android:textColor="@color/colorBlack"
+                android:textSize="32sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <Button
+                android:id="@+id/buttonExpensesAddNew"
+                android:layout_width="393dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginRight="15dp"
+                android:drawableRight="@android:drawable/arrow_up_float"
+                android:onClick="openAddNewExpenseWindow"
+                android:text="Add an expense"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewRegisterTitle2" />
+
+            <com.github.aakira.expandablelayout.ExpandableRelativeLayout
+                android:id="@+id/AddNewExpenseLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/buttonExpensesAddNew"
+                android:layout_marginTop="0dp"
+                android:padding="8dp"
+                app:ael_duration="400"
+                app:ael_expanded="true"
+                app:ael_interpolator="accelerate"
+                app:ael_orientation="vertical"
+                tools:layout_editor_absoluteX="44dp"
+                tools:layout_editor_absoluteY="0dp"
+                app:layout_constraintTop_toBottomOf="@+id/buttonExpensesAddNew">
+
+                <android.support.constraint.ConstraintLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="218dp">
+
+                    <EditText
+                        android:id="@+id/editTextExpensesNewDate"
+                        android:layout_width="150dp"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginRight="20dp"
+                        android:ems="10"
+                        android:hint="Date"
+                        android:inputType="date"
+                        app:layout_constraintEnd_toStartOf="@+id/editTextExpensesNewAmount"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <EditText
+                        android:id="@+id/editTextExpensesNewAmount"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginRight="8dp"
+                        android:ems="10"
+                        android:hint="Amount"
+                        android:inputType="numberDecimal"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/editTextExpensesNewDate"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <EditText
+                        android:id="@+id/editTextExpensesNEwDescription"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginRight="8dp"
+                        android:ems="10"
+                        android:hint="Description"
+                        android:inputType="textPersonName"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/spinnerExpensesNewCategories" />
+
+                    <Button
+                        android:id="@+id/buttonExpensesNewAdd"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="157dp"
+                        android:layout_marginLeft="157dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="157dp"
+                        android:layout_marginRight="157dp"
+                        android:onClick="addToList"
+                        android:text="Add"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/editTextExpensesNEwDescription" />
+
+                    <Spinner
+                        android:id="@+id/spinnerExpensesNewCategories"
+                        android:layout_width="352dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginTop="56dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginRight="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+
+                </android.support.constraint.ConstraintLayout>
+            </com.github.aakira.expandablelayout.ExpandableRelativeLayout>
+
+
+
+            <Button
+                android:id="@+id/buttonExpensesHistory"
+                android:layout_width="393dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:drawableRight="@android:drawable/arrow_up_float"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:onClick="showHistory"
+                android:text="Show history"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_below="@+id/AddNewExpenseLayout"
+                />
+
+            <com.github.aakira.expandablelayout.ExpandableRelativeLayout
+                android:id="@+id/ShowHistoryExpenseLayout"
+                android:layout_width="match_parent"
+                android:layout_height="309dp"
+                android:layout_below="@+id/buttonExpensesHistory"
+                android:layout_marginTop="-12dp"
+                android:padding="8dp"
+                app:ael_duration="400"
+                app:ael_expanded="true"
+                app:ael_interpolator="accelerate"
+                app:ael_orientation="vertical"
+                tools:layout_editor_absoluteX="44dp"
+                tools:layout_editor_absoluteY="0dp">
+
+                <RelativeLayout
+                    android:layout_width="403dp"
+                    android:layout_height="301dp">
+
+                    <com.baoyz.swipemenulistview.SwipeMenuListView
+                        android:id="@+id/listViewExpensesHistory"
+                        android:layout_width="393dp"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginStart="0dp"
+                        android:layout_marginLeft="0dp"
+                        android:layout_marginTop="0dp"
+                        android:layout_marginEnd="1dp"
+                        android:layout_marginRight="1dp"
+                        android:layout_marginBottom="0dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </RelativeLayout>
+
+            </com.github.aakira.expandablelayout.ExpandableRelativeLayout>
+
+
         </RelativeLayout>
+    </FrameLayout>
 
-    </com.github.aakira.expandablelayout.ExpandableRelativeLayout>
-
-    <Button
-        android:id="@+id/IncomeButtonReports"
-        android:layout_width="116dp"
-        android:layout_height="64dp"
-        android:layout_below="@+id/ShowHistoryExpenseLayout"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="3dp"
-        android:layout_marginLeft="3dp"
-        android:layout_marginTop="17dp"
-        android:layout_marginEnd="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginBottom="9dp"
-        android:layout_toStartOf="@+id/ExpenseButtonGoals"
-        android:layout_toLeftOf="@+id/ExpenseButtonGoals"
-        android:layout_toEndOf="@+id/ExpenseButtonIncome"
-        android:layout_toRightOf="@+id/ExpenseButtonIncome"
-        android:onClick="reportsPage"
-        android:text="Reports"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.102"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-
-    <Button
-        android:id="@+id/ExpenseButtonGoals"
-        android:layout_width="120dp"
-        android:layout_height="65dp"
-        android:layout_below="@+id/ShowHistoryExpenseLayout"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginRight="24dp"
-        android:layout_marginBottom="9dp"
-        android:onClick="openGoalsPage"
-        android:text="Goals" />
-
-    <Button
-        android:id="@+id/ExpenseButtonIncome"
-        android:layout_width="120dp"
-        android:layout_height="65dp"
-        android:layout_below="@+id/ShowHistoryExpenseLayout"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="24dp"
-        android:layout_marginLeft="24dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="9dp"
-        android:onClick="openIncomePage"
-        android:text="Income" />
-
-</RelativeLayout>
-
+    <android.support.design.widget.NavigationView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/navigationLayoutExpenses"
+        android:layout_gravity = "start"
+        app:headerLayout="@layout/drawer_header"
+        app:menu="@menu/activity_main_drawer"
+        >
+    </android.support.design.widget.NavigationView>
+</android.support.v4.widget.DrawerLayout>

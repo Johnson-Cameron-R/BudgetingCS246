@@ -6,11 +6,15 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -39,7 +43,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
 
-public class IncomeActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class IncomeActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, NavigationView.OnNavigationItemSelectedListener  {
     private static final String TAG = "Income";
 
     ExpandableRelativeLayout expandableRelativeLayout;
@@ -74,6 +78,9 @@ public class IncomeActivity extends AppCompatActivity implements AdapterView.OnI
         Log.d(TAG, "onCreate: Entered Function");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_income);
+
+        NavigationView navView = (NavigationView)findViewById(R.id.navigationLayoutIncomes);
+        navView.setNavigationItemSelectedListener(this);
 
         //activate FireStore
         db = FirebaseFirestore.getInstance();
@@ -200,19 +207,7 @@ public class IncomeActivity extends AppCompatActivity implements AdapterView.OnI
         //// onclick assignment handled in XML of layout
     }
 
-
-    //******************************************************************************************************************************
-    //UI functions
-    //******************************************************************************************************************************
-//    public void openIncomePage(View v) {
-//        Intent incomeIntent = new Intent(this, IncomeActivity.class);
-//        startActivity(incomeIntent);
-//    }
-
-//    public void openGoalsPage(View v) {
-//        Intent goalsIntent = new Intent(this, GoalsActivity.class);
-//        startActivity(goalsIntent);
-//    }
+    
 
     public void openAddNewIncomeWindow(View view) {
         expandableRelativeLayout = (ExpandableRelativeLayout) findViewById(R.id.AddNewIncomeLayout);
@@ -314,9 +309,39 @@ public class IncomeActivity extends AppCompatActivity implements AdapterView.OnI
         return format.format(number);
     }
 
-    public void reportsPage(View view) {
-        Intent reportsIntent = new Intent(this, ReportsActivity.class);
-        startActivity(reportsIntent);
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawerLayoutIncomes);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawerLayoutIncomes);
+        drawer.closeDrawer(GravityCompat.START);
+
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_reports) {
+            Intent reportsIntent = new Intent(this, ReportsActivity.class);
+            startActivity(reportsIntent);
+        } else if (id == R.id.nav_expenses) {
+            Intent expensesIntent = new Intent(this, ExpensesActivity.class);
+            startActivity(expensesIntent);
+        } else if (id == R.id.nav_incomes) {
+            Intent incomeIntent = new Intent(this, IncomeActivity.class);
+            startActivity(incomeIntent);
+        }
+        return true;
     }
 }
 

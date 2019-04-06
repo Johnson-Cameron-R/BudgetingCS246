@@ -2,16 +2,21 @@ package byuics246.budgeting;
 
 import android.Manifest;
 import android.app.DownloadManager;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -33,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class ReportsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class ReportsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, NavigationView.OnNavigationItemSelectedListener {
     MyWritableWorkbook wb;
 
     private FirebaseFirestore db;
@@ -73,6 +78,9 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reports);
+
+        NavigationView navView = (NavigationView)findViewById(R.id.navigationLayoutReports);
+        navView.setNavigationItemSelectedListener(this);
 
         monthsSpinner = findViewById(R.id.spinnerReportsMonths);
         adapterMonths = ArrayAdapter.createFromResource(this, R.array.Months, android.R.layout.simple_spinner_item);
@@ -342,5 +350,40 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         } else {
             // Permission has already been granted
         }
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawerLayoutReports);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawerLayoutReports);
+        drawer.closeDrawer(GravityCompat.START);
+
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_reports) {
+            Intent reportsIntent = new Intent(this, ReportsActivity.class);
+            startActivity(reportsIntent);
+        } else if (id == R.id.nav_expenses) {
+            Intent expensesIntent = new Intent(this, ExpensesActivity.class);
+            startActivity(expensesIntent);
+        } else if (id == R.id.nav_incomes) {
+            Intent incomeIntent = new Intent(this, IncomeActivity.class);
+            startActivity(incomeIntent);
+        }
+        return true;
     }
 }
