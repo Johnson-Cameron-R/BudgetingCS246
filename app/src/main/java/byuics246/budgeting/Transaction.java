@@ -9,7 +9,8 @@ public class Transaction {
     String user;
     String description;
     String category;
-    Double amount;//or double
+    String amount;//or double
+    String id;
 
     public boolean equals(Transaction obj) {
         if (obj.getDate().equals(date) && obj.getUser().equals(user) && obj.getDescription().equals(description)
@@ -52,19 +53,25 @@ public class Transaction {
         this.category = category;
     }
 
-    public Double getAmount() {
+    public String getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(String amount) {
         this.amount = amount;
     }
 
-    public Transaction(String date, String user, String category, Double amount, String description) {
+    public String getId() {
+        return id;
+    }
+
+    public Transaction(String date, String user, String category, String amount, String description, String id) {
         this.date = date;
         this.user = user;
         this.category = category;
+
         this.amount = amount;
         this.description = description;
+        this.id = id;
     }
 }

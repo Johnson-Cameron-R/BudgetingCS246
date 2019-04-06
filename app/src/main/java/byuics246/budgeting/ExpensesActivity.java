@@ -97,8 +97,7 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 expenseData = document.getData();
-                                String date = expenseData.get("date").toString();
-                                Transaction expense = new Transaction(date, expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
+                                Transaction expense = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString(), expenseData.get("id").toString());
                                 listExpenses.add(expense);
                             }
                             expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
@@ -111,10 +110,8 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
 
         //allow for deletion of list items
         SwipeMenuCreator creator = new SwipeMenuCreator() {
-
             @Override
             public void create(SwipeMenu menu) {
-
                 // create "delete" item
                 SwipeMenuItem deleteItem = new SwipeMenuItem(
                         getApplicationContext());
@@ -146,7 +143,6 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
 //                menu.addMenuItem(openItem);
             }
         };
-
         // set creator
         listView.setMenuCreator(creator);
 
@@ -163,15 +159,9 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
                         String description = toDelete.getDescription();
                         String category = toDelete.getCategory();
                         String amount = toDelete.getAmount();
-//                        listExpenses.remove(position);
-//                        expensesHistoryAdapter.notifyDataSetChanged();
+                        db = FirebaseFirestore.getInstance();
                         db.collection(loginPreferences.getString("email", "") + "/Budget/Expenses")
-//                            .whereEqualTo("date", toDelete.getDate())
-//                            .whereEqualTo("user", toDelete.getUser())
-                                .whereEqualTo("amount", toDelete.getAmount())
-//                                .whereEqualTo("description", toDelete.getDescription())
-//                                .whereEqualTo("category", toDelete.getCategory())
-//                                .whereEqualTo("id", toDelete.getID())
+                                .whereEqualTo("id", toDelete.getId())
                             .orderBy("date", Query.Direction.DESCENDING)
                             .get()
                             .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -187,7 +177,6 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
                                             if (numOfRecords <=1) {
                                                 docName = document.getId();
                                                 String date = expenseData.get("date").toString();
-                                                Transaction expense = new Transaction(date, expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
                                             }
                                             else {
                                                 Log.d(TAG, "Multiple similar records: ");
@@ -270,9 +259,12 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
 
         if (validateForm()) {
             String dateToAdd = new Conversion().reformatDateForDB(newDate.getText().toString());
-            Transaction example2 = new Transaction(dateToAdd, loginPreferences.getString("name", ""), String.valueOf(new Conversion().ConvertCategory(category, getResources().getStringArray(R.array.ExpensesCategories))), newAmount.getText().toString(),newDescription.getText().toString());////////////////////
-            expensesHistoryAdapter.add(example2);
-            db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Expenses").add(example2);
+            Transaction expense = new Transaction(dateToAdd, loginPreferences.getString("name", ""), String.valueOf(new Conversion().ConvertCategory(category, getResources().getStringArray(R.array.ExpensesCategories))), newAmount.getText().toString(),newDescription.getText().toString(), new Utilities().randomString());////////////////////
+            listExpenses.add(expense);
+            expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
+            listView.setAdapter(expensesHistoryAdapter);
+
+            db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Expenses").add(expense);
             Toast.makeText(this, "The expense has been added" ,
                     Toast.LENGTH_LONG).show();
         }

@@ -180,7 +180,7 @@
             android:layout_width="403dp"
             android:layout_height="278dp">
 
-            <ListView
+            <com.baoyz.swipemenulistview.SwipeMenuListView
                 android:id="@+id/listViewIncomeHistory"
                 android:layout_width="393dp"
                 android:layout_height="299dp"
@@ -212,8 +212,6 @@
         android:layout_marginStart="1dp"
         android:layout_marginLeft="1dp"
         android:layout_marginBottom="5dp"
-        android:layout_toEndOf="@+id/IncomeButtonExpense"
-        android:layout_toRightOf="@+id/IncomeButtonExpense"
         android:onClick="reportsPage"
         android:text="Reports"
         app:layout_constraintEnd_toEndOf="parent"

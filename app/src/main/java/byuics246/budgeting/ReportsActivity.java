@@ -165,8 +165,9 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 expenseData = document.getData();
-                                Transaction amount = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
-                                incomes.add(amount);
+                                String docID = document.getId();
+                                Transaction income = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString(), expenseData.get("id").toString());
+                                incomes.add(income);
                             }
 //                            for (Transaction b: incomes)
 //                            {
@@ -184,8 +185,7 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
                                             if (task.isSuccessful()) {
                                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                                     expenseData = document.getData();
-                                                    String date = expenseData.get("date").toString();
-                                                    Transaction expense = new Transaction(date, expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
+                                                    Transaction expense = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString(), expenseData.get("id").toString());
                                                     expenses.add(expense);
                                                 }
                                                 cellNumberRecords.addAll(getRecords(expenses, startExpensesIncomesCellsX, startExpensesCategoriesCellY));

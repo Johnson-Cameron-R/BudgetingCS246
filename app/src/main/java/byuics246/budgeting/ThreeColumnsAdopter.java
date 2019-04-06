@@ -51,8 +51,9 @@ class ThreeColumnsAdapter extends ArrayAdapter<Transaction> {
         String amount = String.valueOf(getItem(position). getAmount());
         String user = getItem(position). getUser();
         String description = getItem(position). getDescription();
+        String id = getItem(position). getId();
 
-        Transaction expense1 = new Transaction(date, user, category, amount, description);
+        Transaction expense1 = new Transaction(date, user, category, amount, description, id);
 
         LayoutInflater inflater = LayoutInflater.from(mContext);
 //        convertView = inflater.inflate(mResourse, parent, false);

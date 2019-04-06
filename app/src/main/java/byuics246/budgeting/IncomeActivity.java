@@ -3,6 +3,8 @@ package byuics246.budgeting;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +20,10 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.baoyz.swipemenulistview.SwipeMenu;
+import com.baoyz.swipemenulistview.SwipeMenuCreator;
+import com.baoyz.swipemenulistview.SwipeMenuItem;
+import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.github.aakira.expandablelayout.ExpandableRelativeLayout;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -38,8 +44,10 @@ public class IncomeActivity extends AppCompatActivity implements AdapterView.OnI
     ExpandableRelativeLayout expandableRelativeLayout;
 
     //for history listView
-    ListView listView;
-    ArrayList <Transaction> listIncome;
+    SwipeMenuListView listView;
+    ArrayList <Transaction> listIncomes;
+    int indexItemToDelete;
+    Transaction toDelete;
 
     //for add new expense
     private EditText newDate;
@@ -51,7 +59,7 @@ public class IncomeActivity extends AppCompatActivity implements AdapterView.OnI
     boolean hasSource = false;
     ArrayAdapter <CharSequence> adapterCategories;
     Spinner categoriesSpinner;
-    ThreeColumnsAdapter IncomeHistoryAdapter;
+    ThreeColumnsAdapter incomeHistoryAdapter;
 
     //Firebase DB
     private FirebaseFirestore db;
@@ -74,8 +82,8 @@ public class IncomeActivity extends AppCompatActivity implements AdapterView.OnI
         loginPrefsEditor = loginPreferences.edit();
 
         //activate a history list view
-        listView = (ListView) findViewById(R.id.listViewIncomeHistory);
-        listIncome = new ArrayList<>();
+        listView = (SwipeMenuListView) findViewById(R.id.listViewIncomeHistory);
+        listIncomes = new ArrayList<>();
 
         //get data from DB and add it to the viewer.
         db.collection(loginPreferences.getString("email", "") + "/Budget/Income")
@@ -88,16 +96,115 @@ public class IncomeActivity extends AppCompatActivity implements AdapterView.OnI
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 expenseData = document.getData();
-                                Transaction income = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString());
-                                listIncome.add(income);
+                                Transaction income = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString(), expenseData.get("id").toString());
+                                listIncomes.add(income);
                             }
-                            IncomeHistoryAdapter = new ThreeColumnsAdapter(IncomeActivity.this, R.layout.three_columns_history_layout, listIncome);
-                            listView.setAdapter(IncomeHistoryAdapter);
+                            incomeHistoryAdapter = new ThreeColumnsAdapter(IncomeActivity.this, R.layout.three_columns_history_layout, listIncomes);
+                            listView.setAdapter(incomeHistoryAdapter);
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
                         }
                     }
                 });
+
+        //allow for deletion of list items
+        SwipeMenuCreator creator = new SwipeMenuCreator() {
+            @Override
+            public void create(SwipeMenu menu) {
+                // create "delete" item
+                SwipeMenuItem deleteItem = new SwipeMenuItem(
+                        getApplicationContext());
+                // set item background
+                deleteItem.setBackground(new ColorDrawable(Color.rgb(0xF9,
+                        0x3F, 0x25)));
+                // set item width
+                deleteItem.setWidth(170);
+                // set a icon
+                deleteItem.setIcon(R.drawable.ic_delete);
+                // add to menu
+                menu.addMenuItem(deleteItem);
+
+//                // create "open" item
+//                SwipeMenuItem openItem = new SwipeMenuItem(
+//                        getApplicationContext());
+//                // set item background
+//                openItem.setBackground(new ColorDrawable(Color.rgb(0xC9, 0xC9,
+//                        0xCE)));
+//                // set item width
+//                openItem.setWidth(170);
+//                // set item title
+//                openItem.setTitle("Open");
+//                // set item title fontsize
+//                openItem.setTitleSize(18);
+//                // set item title font color
+//                openItem.setTitleColor(Color.WHITE);
+//                // add to menu
+//                menu.addMenuItem(openItem);
+            }
+        };
+        // set creator
+        listView.setMenuCreator(creator);
+
+        listView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
+                indexItemToDelete = position;
+                switch (index) {
+                    case 0:
+                        // delete
+                        toDelete = listIncomes.get(position);
+                        String date = toDelete.getDate();
+                        String user = toDelete.getUser();
+                        String description = toDelete.getDescription();
+                        String category = toDelete.getCategory();
+                        String amount = toDelete.getAmount();
+                        db = FirebaseFirestore.getInstance();
+                        db.collection(loginPreferences.getString("email", "") + "/Budget/Income")
+                                .whereEqualTo("id", toDelete.getId())
+                                .orderBy("date", Query.Direction.DESCENDING)
+                                .get()
+                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        Map<String, Object> expenseData;
+                                        if (task.isSuccessful()) {
+                                            int numOfRecords = 0;
+                                            String docName = "";
+                                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                                numOfRecords++;
+                                                expenseData = document.getData();
+                                                if (numOfRecords <=1) {
+                                                    docName = document.getId();
+                                                    String date = expenseData.get("date").toString();
+                                                }
+                                                else {
+                                                    Log.d(TAG, "Multiple similar records: ");
+                                                    break;
+                                                }
+                                            }
+                                            if (numOfRecords == 1)
+                                            {
+                                                db.collection(loginPreferences.getString("email", "") + "/Budget/Incomes")
+                                                        .document(docName).delete();
+                                            }
+                                            listIncomes.remove(indexItemToDelete);
+                                            incomeHistoryAdapter = new ThreeColumnsAdapter(IncomeActivity.this, R.layout.three_columns_history_layout, listIncomes);
+                                            listView.setAdapter(incomeHistoryAdapter);
+                                        } else {
+                                            Log.d(TAG, "Error getting documents: ", task.getException());
+                                        }
+                                    }
+                                });
+
+                        break;
+//                    case 1:
+//                        // open
+//                        break;
+                }
+                // false : close the menu; true : not close the menu
+                return false;
+            }
+        });
 
         //activate add new Income fields
         newDate = findViewById(R.id.editTextIncomeNewDate);
@@ -146,9 +253,12 @@ public class IncomeActivity extends AppCompatActivity implements AdapterView.OnI
 
         if (validateForm()) {
             String dateToAdd = new Conversion().reformatDateForDB(newDate.getText().toString());
-            Transaction incomeTransaction = new Transaction(dateToAdd, loginPreferences.getString("name", ""), String.valueOf(new Conversion().ConvertCategory(source, getResources().getStringArray(R.array.IncomeCategories))), newAmount.getText().toString(),newDescription.getText().toString());////////////////////
-            IncomeHistoryAdapter.add(incomeTransaction);
-            db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Income").add(incomeTransaction);
+            Transaction income = new Transaction(dateToAdd, loginPreferences.getString("name", ""), String.valueOf(new Conversion().ConvertCategory(source, getResources().getStringArray(R.array.IncomeCategories))), newAmount.getText().toString(),newDescription.getText().toString(), new Utilities().randomString());////////////////////
+            listIncomes.add(income);
+            incomeHistoryAdapter = new ThreeColumnsAdapter(IncomeActivity.this, R.layout.three_columns_history_layout, listIncomes);
+            listView.setAdapter(incomeHistoryAdapter);
+
+            db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Income").add(income);
             Toast.makeText(this, "The income has been added" ,
                     Toast.LENGTH_LONG).show();
         }
