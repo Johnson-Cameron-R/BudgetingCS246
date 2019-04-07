@@ -153,13 +153,13 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         monthNumberString+=String.valueOf(monthNumber);
 
         //Pull amount goals categories and values
-        incomesGoals.add(new Goal("Navex", "500", "1"));
-        incomesGoals.add(new Goal("BYUI", "600", "2"));
+//        incomesGoals.add(new Goal("Navex", "500", "1"));
+//        incomesGoals.add(new Goal("BYUI", "600", "2"));
 
 
         //Pull expenses goals categories and values
-        expensesGoals.add(new Goal("Inactive Savings", "700", "1"));
-        expensesGoals.add(new Goal("Education", "800", "2"));
+//        expensesGoals.add(new Goal("Inactive Savings", "700", "1"));
+//        expensesGoals.add(new Goal("Education", "800", "2"));
 
         //Pull incomes of the asked month and year
         db.collection(loginPreferences.getString("email", "") + "/Budget/Income")

@@ -162,23 +162,56 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
                     case 0:
                         // delete
                         toDelete = listExpenses.get(position);
-                        db.collection(loginPreferences.getString("email", "") + "/Budget/Expenses").document(toDelete.getId())
-                                .delete()
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        db.collection(loginPreferences.getString("email", "") + "/Budget/Expenses")
+                                .whereEqualTo("id", toDelete.getId())
+                                .orderBy("date", Query.Direction.DESCENDING)
+                                .get()
+                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                     @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Log.d(TAG, "DocumentSnapshot successfully deleted!");
-                                        listExpenses.remove(indexItemToDelete);
-                                        expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
-                                        listView.setAdapter(expensesHistoryAdapter);
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        Map<String, Object> expenseData;
+                                        if (task.isSuccessful()) {
+                                            int numOfRecords = 0;
+                                            String docName = "";
+                                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                                numOfRecords++;
+                                                expenseData = document.getData();
+                                                if (numOfRecords <=1) {
+                                                    docName = document.getId();
+                                                    String date = expenseData.get("date").toString();
+                                                }
+                                                else {
+                                                    Log.d(TAG, "Multiple similar records: ");
+                                                    break;
+                                                }
+                                            }
+                                            if (numOfRecords == 1)
+                                            {
+                                                db.collection(loginPreferences.getString("email", "") + "/Budget/Expenses")
+                                                        .document(docName).delete()
+                                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                            @Override
+                                                            public void onSuccess(Void aVoid) {
+                                                                Log.d(TAG, "DocumentSnapshot successfully deleted!");
+                                                                listExpenses.remove(indexItemToDelete);
+                                                                expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
+                                                                listView.setAdapter(expensesHistoryAdapter);
+                                                            }
+                                                        })
+                                                        .addOnFailureListener(new OnFailureListener() {
+                                                            @Override
+                                                            public void onFailure(@NonNull Exception e) {
+                                                                Log.w(TAG, "Error deleting document", e);
+                                                            }
+                                                        });
+                                            }
+                                        } else {
+                                            Log.d(TAG, "Error getting documents: ", task.getException());
+                                        }
                                     }
                                 })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Log.w(TAG, "Error deleting document", e);
-                                    }
-                                });
+
+                        ;
                         break;
 //                    case 1:
 //                        // open
