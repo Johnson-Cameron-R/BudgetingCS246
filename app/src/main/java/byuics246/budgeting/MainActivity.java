@@ -16,14 +16,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
-//import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+//import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -139,6 +139,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 });
     }
 
+    /**
+     * Saves a user's login info locally
+     * <p>
+     *     This function accepts the user credentials as parameters. If the checkbox
+     *     to save user info is checked, it will store user credentials on the device
+     *     so it will then be loaded next time the app is opened.
+     * </p>
+     * @param email String for the user email to be authenticated with
+     * @param password String for the user password to be authenticated with
+     * @param name String for the display name to be saved in the shared preferences
+     */
     private void saveLoginInfo(String email, String password, String name) {
         if (saveLoginCheckBox.isChecked()) {
             loginPrefsEditor.putBoolean("saveLogin", true);
@@ -153,6 +164,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    /**
+     * Allows user to request password reset
+     * <p>
+     *     When a user chooses to reset password, an email will be sent to them to
+     *     confirm request and to ask for a new password for their account.
+     * </p>
+     */
     public void resetPassword() {
         if (!validatePasswordReset()) {
             Log.d(TAG, "FormNotValid");
@@ -170,6 +188,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 });
     }
 
+    /**
+     * Required field for password reset
+     * <p>
+     *     Checks to see if user has input in their email. The user must do so
+     *     to know where to send change password request.
+     * </p>
+     * @return
+     */
     private boolean validatePasswordReset() {
         boolean valid = true;
 
@@ -184,11 +210,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return valid;
     }
 
+    /**
+     * Opens register page for new users
+     * <p>
+     *     New users select to register and then create their account
+     * </p>
+     */
     public void openRegisterPage() {
         Intent registerIntent = new Intent(this, RegisterActivity.class);
         startActivity(registerIntent);
     }
 
+    /**
+     * Validates that all necessary fields are filled out before submission
+     * <p>
+     *     Confirms that email, password, and name fields are completed before
+     *     submission. If a field is missing, display error.
+     * </p>
+     * @return
+     */
     private boolean validateForm() {
         boolean valid = true;
 
@@ -219,6 +259,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return valid;
     }
 
+    /**
+     * Actions for onclicklistener
+     * <p>
+     *     Directs the onclicklistener calls to their appropriate activities. Code is commented
+     *     out for future development.
+     * </p>
+     * @param v view name associated with call
+     */
     @Override
     public void onClick(View v) {
         int i = v.getId();
@@ -241,6 +289,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
           }
     }
 
+    /**
+     * Code for future development
+     */
     public void requestPermission(){
         //request and check permissions
         if (ContextCompat.checkSelfPermission(this,
