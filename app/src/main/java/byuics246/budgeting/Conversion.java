@@ -51,6 +51,16 @@ public class Conversion {
         Log.d(TAG, "Wrong month value");
         return monthInt;
     }
+
+
+    public String convertMonthIntToNumberString(int monthNumber) {
+        String monthNumberString = "";
+        if (monthNumber < 10)
+            monthNumberString+="0";
+        monthNumberString+=String.valueOf(monthNumber);
+        return monthNumberString;
+    }
+
     public  String convertExpenseCategoryIDToString(int categoryID, View view){
         String[] categories = view.getResources().getStringArray(R.array.ExpensesCategories);
         return categories[categoryID];
