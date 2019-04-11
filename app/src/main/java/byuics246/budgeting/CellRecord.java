@@ -1,11 +1,20 @@
 package byuics246.budgeting;
 
-class CellNumberRecord {
+/**
+ * represents a colection of data to be inserted into the excel cell
+ * <p>
+ * Contains a column and row number and a value to be inserted.
+ * The value can be of any type
+ * </p>
+ *
+ * @param <E>
+ */
+public class  CellRecord <E>{
     int column;
     int row;
-    double value;
+    E value;
 
-    public CellNumberRecord(int column, int row, double value) {
+    public CellRecord(int column, int row, E value) {
         this.column = column;
         this.row = row;
         this.value = value;
@@ -27,11 +36,11 @@ class CellNumberRecord {
         this.row = row;
     }
 
-    public double getValue() {
+    public E getValue() {
         return value;
     }
 
-    public void setValue(double value) {
+    public void setValue(E value) {
         this.value = value;
     }
 }

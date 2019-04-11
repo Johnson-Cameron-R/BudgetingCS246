@@ -86,7 +86,7 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
     List <Goal> expensesGoals = new ArrayList<>();
     List <Transaction> expenses = new ArrayList<>();
     List <Transaction> incomes = new ArrayList<>();
-    List <CellNumberRecord> cellNumberRecords = new ArrayList<>();
+    List <CellRecord <Double>> cellNumberRecords = new ArrayList<>();
 
     /**
      * Creates a view and initializes variables
@@ -243,7 +243,7 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
 //                                                cellNumberRecords.addAll(getGoalRecordsNumber(expensesGoals, startExpensesIncomesGoalsCellX, startExpensesCategoriesCellY));
 //                                                cellNumberRecords.addAll(getGoalRecordsNumber(incomesGoals, startExpensesIncomesGoalsCellX, startIncomesCategoriesCellY));
 
-                                                List <CellStringRecord> cellStringRecords = new ArrayList<>();
+                                                List <CellRecord <String>> cellStringRecords = new ArrayList<>();
 //                                                cellStringRecords.addAll(getGoalRecordsString(expensesGoals, startExpensesIncomesCategoriesCellX, startExpensesCategoriesCellY));
 //                                                cellStringRecords.addAll(getGoalRecordsString(incomesGoals, startExpensesIncomesCategoriesCellX, startIncomesCategoriesCellY));
 
@@ -342,9 +342,9 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
      * @param startCellsY
      * @return
      */
-    private List <CellNumberRecord> getTransactionRecords(List <Transaction> transactions, int startCellsX, int startCellsY)
+    private List <CellRecord <Double>> getTransactionRecords(List <Transaction> transactions, int startCellsX, int startCellsY)
     {
-        List <CellNumberRecord> cellNumberRecords = new ArrayList<>();
+        List <CellRecord <Double>> cellNumberRecords = new ArrayList<>();
         for (Transaction ex : transactions) {
             try {
                 Date date=new SimpleDateFormat("yyyy-MM-dd").parse(ex.date);
@@ -353,7 +353,7 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
                 double amount = Double.parseDouble(ex.getAmount());
                 // if there is a record for the same day for the same category, update its value to its original value + amount
                 boolean found = false;
-                for (CellNumberRecord cr : cellNumberRecords){
+                for (CellRecord <Double> cr : cellNumberRecords){
                     if (cr.getColumn() == day + startCellsX && cr.getRow() == category + startCellsY){
                         found = true;
                         cr.setValue(amount + cr.getValue());
@@ -362,7 +362,7 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
                 }
                 //if there are no records for the same day for the same category create a new record
                 if (!found) {
-                    CellNumberRecord cellNumberRecord = new CellNumberRecord(day + startCellsX, category + startCellsY, amount);
+                    CellRecord < Double> cellNumberRecord = new CellRecord < Double>(day + startCellsX, category + startCellsY, amount);
                     cellNumberRecords.add(cellNumberRecord);
                 }
             } catch (ParseException e) {
@@ -379,13 +379,13 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
      * @param startCellsY
      * @return
      */
-    private List <CellStringRecord> getGoalRecordsString(List <Goal> goals, int startCellsX, int startCellsY)
+    private List <CellRecord <String>> getGoalRecordsString(List <Goal> goals, int startCellsX, int startCellsY)
     {
-        List <CellStringRecord> cellStringRecords = new ArrayList<>();
+        List <CellRecord <String>> cellStringRecords = new ArrayList<>();
         for (Goal g : goals) {
             String value = g.getName();
             int id = Integer.parseInt(g.getId());
-            CellStringRecord cellStringRecord = new CellStringRecord(startCellsX + 1, id + startCellsY, value);
+            CellRecord <String> cellStringRecord = new CellRecord<String>(startCellsX + 1, id + startCellsY, value);
             cellStringRecords.add(cellStringRecord);
 
         }
@@ -399,12 +399,12 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
      * @param startCellsY
      * @return
      */
-    private List <CellNumberRecord> getGoalRecordsNumber(List <Goal> goals, int startCellsX, int startCellsY) {
-        List<CellNumberRecord> cellNumberRecords = new ArrayList<>();
+    private List <CellRecord <Double>> getGoalRecordsNumber(List <Goal> goals, int startCellsX, int startCellsY) {
+        List<CellRecord <Double>> cellNumberRecords = new ArrayList<>();
         for (Goal g : goals) {
             Double value = Double.parseDouble(g.getAmount());
             int id = Integer.parseInt(g.getId());
-            CellNumberRecord cellNumberRecord = new CellNumberRecord(startCellsX + 1, id + startCellsY, value);
+            CellRecord <Double> cellNumberRecord = new CellRecord <Double>(startCellsX + 1, id + startCellsY, value);
             cellNumberRecords.add(cellNumberRecord);
         }
         return cellNumberRecords;

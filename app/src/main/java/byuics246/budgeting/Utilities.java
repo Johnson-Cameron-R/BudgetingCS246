@@ -4,6 +4,11 @@ import java.util.Random;
 
 public class Utilities {
     int randomStringLength = 20;
+
+    /**
+     * creates a random string of a set length
+     * @return
+     */
     String randomString() {
         Random r = new Random();
         StringBuilder sb = new StringBuilder();

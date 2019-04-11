@@ -1,5 +1,8 @@
 package byuics246.budgeting;
 
+/**
+ * represents income and expence goals
+ */
 public class Goal {
     String name;
     String amount;

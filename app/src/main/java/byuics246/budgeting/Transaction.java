@@ -4,6 +4,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * represents both income and expense transactions with getters and setters
+ */
 public class Transaction {
     String date;/////
     String user;
@@ -12,14 +15,6 @@ public class Transaction {
     String amount;//or double
     String id;
 
-    public boolean equals(Transaction obj) {
-        if (obj.getDate().equals(date) && obj.getUser().equals(user) && obj.getDescription().equals(description)
-                && obj.getCategory().equals(category) && obj.getAmount().equals(amount)) {
-            return true;
-        }
-        else
-            return false;
-    }
 
     public String getDate() {
         return date;
