@@ -43,6 +43,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
 
+/**
+ * Handles all activities on the Expence page
+ *
+ * @author Cameron Johnson and Inessa Carroll
+ */
 public class IncomeActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, NavigationView.OnNavigationItemSelectedListener  {
     private static final String TAG = "Income";
 

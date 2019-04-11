@@ -10,7 +10,9 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * contains all types of conversion functions
+ * Contains all types of conversion functions
+ *
+ * @author Inessa Carroll
  */
 public class Conversion {
     private static final String TAG = "Convertion";
@@ -19,6 +21,7 @@ public class Conversion {
     /**
      * converts a category string into a category index
      *
+     * @author Inessa Carroll
      * @param category
      * @param categories
      * @return

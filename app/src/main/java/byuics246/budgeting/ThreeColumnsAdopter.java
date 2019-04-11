@@ -12,6 +12,8 @@ import java.util.ArrayList;
 
 /**
  * creates tree columns for transaction history view
+ *
+ * @author Inessa Carroll
  */
 class ThreeColumnsAdapter extends ArrayAdapter<Transaction> {
     private Context mContext;

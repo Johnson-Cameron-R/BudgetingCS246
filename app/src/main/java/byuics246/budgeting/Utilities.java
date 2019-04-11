@@ -2,6 +2,11 @@ package byuics246.budgeting;
 
 import java.util.Random;
 
+/**
+ * contains supporting fucntions
+ *
+ * @author Inessa Carroll
+ */
 public class Utilities {
     int randomStringLength = 20;
 

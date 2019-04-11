@@ -6,6 +6,8 @@ import java.util.Date;
 
 /**
  * represents both income and expense transactions with getters and setters
+ *
+ * @author Inessa Carroll
  */
 public class Transaction {
     String date;/////

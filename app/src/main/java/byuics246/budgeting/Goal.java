@@ -2,6 +2,8 @@ package byuics246.budgeting;
 
 /**
  * represents income and expence goals
+ *
+ * @author Inessa Carroll
  */
 public class Goal {
     String name;

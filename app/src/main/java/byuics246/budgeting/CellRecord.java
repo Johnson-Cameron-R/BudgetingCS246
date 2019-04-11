@@ -7,6 +7,7 @@ package byuics246.budgeting;
  * The value can be of any type
  * </p>
  *
+ * @author Inessa Carroll
  * @param <E>
  */
 public class  CellRecord <E>{

@@ -26,6 +26,8 @@ import android.util.Log;
 
 /**
  * represents an excel file workbook class
+ *
+ * @author Inessa Carroll
  */
 public class MyWritableWorkbook {
     private static final String TAG = "Writable book";
