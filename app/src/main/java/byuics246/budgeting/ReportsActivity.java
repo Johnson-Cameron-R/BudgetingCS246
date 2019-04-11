@@ -335,7 +335,7 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
     }
 
     /**
-     *
+     * based on date and category of a transaction, creates a record with the cell coordinates and amount
      *
      * @param transactions
      * @param startCellsX
@@ -372,7 +372,13 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         return cellNumberRecords;
     }
 
-
+    /**
+     * creates a cell string record of a list of goals
+     * @param goals
+     * @param startCellsX
+     * @param startCellsY
+     * @return
+     */
     private List <CellStringRecord> getGoalRecordsString(List <Goal> goals, int startCellsX, int startCellsY)
     {
         List <CellStringRecord> cellStringRecords = new ArrayList<>();
@@ -386,6 +392,13 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         return cellStringRecords;
     }
 
+    /**
+     * created a list of number records of goals
+     * @param goals
+     * @param startCellsX
+     * @param startCellsY
+     * @return
+     */
     private List <CellNumberRecord> getGoalRecordsNumber(List <Goal> goals, int startCellsX, int startCellsY) {
         List<CellNumberRecord> cellNumberRecords = new ArrayList<>();
         for (Goal g : goals) {
@@ -397,6 +410,9 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         return cellNumberRecords;
     }
 
+    /**
+     * requests memory permission from the user
+     */
     public void requestPermission(){
         //request and check permissions
         if (ContextCompat.checkSelfPermission(this,
@@ -423,6 +439,9 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
     }
 
 
+    /**
+     * closes navigation panel if user clicks outside of it
+     */
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawerLayoutReports);
@@ -434,7 +453,11 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
     }
 
 
-
+    /**
+     * navigates to different pages
+     * @param item
+     * @return
+     */
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
