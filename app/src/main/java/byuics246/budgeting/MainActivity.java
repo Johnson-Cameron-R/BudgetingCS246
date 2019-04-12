@@ -25,6 +25,11 @@ import com.google.firebase.auth.FirebaseUser;
 
 //import android.widget.TextView;
 
+/**
+ * Handles all activities on the Register page
+ *
+ * @author Cameron Johnson
+ */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "Main";
