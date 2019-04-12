@@ -15,6 +15,8 @@
         android:id="@+id/frameLayoutIncomes"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
+
         <RelativeLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -41,7 +43,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Button
-                android:id="@+id/buttonIncomeAddNew"
+                android:id="@+id/buttonIncomesAddNew"
                 android:layout_width="393dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
@@ -53,7 +55,7 @@
                 android:layout_marginRight="15dp"
                 android:drawableRight="@android:drawable/arrow_up_float"
                 android:onClick="openAddNewIncomeWindow"
-                android:text="ADD AN INCOME"
+                android:text="Add an income"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewRegisterTitle2" />
@@ -62,7 +64,7 @@
                 android:id="@+id/AddNewIncomeLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/buttonIncomeAddNew"
+                android:layout_below="@+id/buttonIncomesAddNew"
                 android:layout_marginTop="0dp"
                 android:padding="8dp"
                 app:ael_duration="400"
@@ -71,14 +73,14 @@
                 app:ael_orientation="vertical"
                 tools:layout_editor_absoluteX="44dp"
                 tools:layout_editor_absoluteY="0dp"
-                app:layout_constraintTop_toBottomOf="@+id/buttonIncomeAddNew">
+                app:layout_constraintTop_toBottomOf="@+id/buttonIncomesAddNew">
 
                 <android.support.constraint.ConstraintLayout
                     android:layout_width="wrap_content"
                     android:layout_height="218dp">
 
                     <EditText
-                        android:id="@+id/editTextIncomeNewDate"
+                        android:id="@+id/editTextIncomesNewDate"
                         android:layout_width="150dp"
                         android:layout_height="wrap_content"
                         android:layout_alignParentLeft="true"
@@ -90,12 +92,12 @@
                         android:ems="10"
                         android:hint="Date"
                         android:inputType="date"
-                        app:layout_constraintEnd_toStartOf="@+id/editTextIncomeNewAmount"
+                        app:layout_constraintEnd_toStartOf="@+id/editTextIncomesNewAmount"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <EditText
-                        android:id="@+id/editTextIncomeNewAmount"
+                        android:id="@+id/editTextIncomesNewAmount"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="20dp"
@@ -106,11 +108,11 @@
                         android:hint="Amount"
                         android:inputType="numberDecimal"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/editTextIncomeNewDate"
+                        app:layout_constraintStart_toEndOf="@+id/editTextIncomesNewDate"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <EditText
-                        android:id="@+id/editTextIncomeNEwDescription"
+                        android:id="@+id/editTextIncomesNewDescription"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
@@ -124,10 +126,10 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_bias="0.0"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/spinnerIncomeNewCategories" />
+                        app:layout_constraintTop_toBottomOf="@+id/spinnerIncomesNewCategories" />
 
                     <Button
-                        android:id="@+id/buttonIncomeNewAdd"
+                        android:id="@+id/buttonIncomesNewAdd"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="157dp"
@@ -139,20 +141,20 @@
                         android:text="Add"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/editTextIncomeNEwDescription" />
+                        app:layout_constraintTop_toBottomOf="@+id/editTextIncomesNewDescription" />
 
                     <Spinner
-                        android:id="@+id/spinnerIncomeNewCategories"
-                        android:layout_width="0dp"
+                        android:id="@+id/spinnerIncomesNewCategories"
+                        android:layout_width="352dp"
                         android:layout_height="40dp"
                         android:layout_marginStart="8dp"
                         android:layout_marginLeft="8dp"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="56dp"
                         android:layout_marginEnd="8dp"
                         android:layout_marginRight="8dp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/editTextIncomeNewDate" />
+                        app:layout_constraintTop_toTopOf="parent" />
 
 
                 </android.support.constraint.ConstraintLayout>
@@ -161,7 +163,7 @@
 
 
             <Button
-                android:id="@+id/buttonIncomeHistory"
+                android:id="@+id/buttonIncomesHistory"
                 android:layout_width="393dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
@@ -182,9 +184,9 @@
             <com.github.aakira.expandablelayout.ExpandableRelativeLayout
                 android:id="@+id/ShowHistoryIncomeLayout"
                 android:layout_width="match_parent"
-                android:layout_height="316dp"
-                android:layout_below="@+id/buttonIncomeHistory"
-                android:layout_marginTop="0dp"
+                android:layout_height="430dp"
+                android:layout_below="@+id/buttonIncomesHistory"
+                android:layout_marginTop="-12dp"
                 android:padding="8dp"
                 app:ael_duration="400"
                 app:ael_expanded="true"
@@ -193,36 +195,34 @@
                 tools:layout_editor_absoluteX="44dp"
                 tools:layout_editor_absoluteY="0dp">
 
-                <RelativeLayout
-                    android:layout_width="403dp"
-                    android:layout_height="278dp">
+                <LinearLayout android:orientation="vertical"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    xmlns:android="http://schemas.android.com/apk/res/android">
 
-                    <com.baoyz.swipemenulistview.SwipeMenuListView
-                        android:id="@+id/listViewIncomeHistory"
-                        android:layout_width="393dp"
-                        android:layout_height="299dp"
-                        android:layout_alignParentStart="true"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentTop="true"
-                        android:layout_alignParentEnd="true"
-                        android:layout_alignParentRight="true"
-                        android:layout_alignParentBottom="true"
-                        android:layout_marginStart="2dp"
-                        android:layout_marginLeft="2dp"
-                        android:layout_marginTop="0dp"
-                        android:layout_marginEnd="0dp"
-                        android:layout_marginRight="0dp"
-                        android:layout_marginBottom="71dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                    <android.support.v7.widget.RecyclerView
+                        android:layout_height="0dp"
+                        android:layout_width="match_parent"
+                        android:scrollbars="vertical"
+                        android:layout_weight="1"
+                        android:elevation="2dp"
+                        android:layout_margin="5dp"
+                        android:id="@+id/my_recycler_view"/>
 
-                </RelativeLayout>
+                    <TextView
+                        android:layout_height="match_parent"
+                        android:layout_width="match_parent"
+                        android:id="@+id/empty_view"
+                        android:visibility="gone"
+                        android:text="No Records"
+                        android:gravity="center"/>
+
+                </LinearLayout>
+
             </com.github.aakira.expandablelayout.ExpandableRelativeLayout>
-
         </RelativeLayout>
     </FrameLayout>
+
     <android.support.design.widget.NavigationView
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
@@ -233,4 +233,3 @@
         >
     </android.support.design.widget.NavigationView>
 </android.support.v4.widget.DrawerLayout>
-

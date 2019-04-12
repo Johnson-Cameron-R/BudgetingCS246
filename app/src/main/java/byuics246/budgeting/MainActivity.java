@@ -116,13 +116,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 saveLoginInfo(email, password, name);
                                 // send user to expense page after login
                                 Log.d(TAG, "saved credentials, sending to expense page");
-                                Intent openExpensesActivity = new Intent(getApplicationContext(), ExpensesActivity.class);
+                                Intent openExpensesActivity = new Intent(getApplicationContext(),
+                                        ExpensesActivity.class);
                                 startActivity(openExpensesActivity);
                             } else {
                                 new AlertDialog.Builder(MainActivity.this)
                                         .setTitle("Verify Account")
-                                        .setMessage("Account is not verified. Please check your email to verify your account first.")
-                                        .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                                        .setMessage("Account is not verified. Please check your " +
+                                                "email to verify your account first.")
+                                        .setPositiveButton("Close", new DialogInterface.
+                                                OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
                                             }
@@ -135,7 +138,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             new AlertDialog.Builder(MainActivity.this)
                                     .setTitle("Authentication Failed")
                                     .setMessage("Invalid credentials. Please try again.")
-                                    .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                                    .setPositiveButton("Close", new DialogInterface.
+                                            OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                         }
@@ -231,7 +235,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (i == R.id.buttonSignInRegister) {
             openRegisterPage();
         } else if (i == R.id.buttonSignInLogin) {
-            signIn(mEmailField.getText().toString(), mPasswordField.getText().toString(), mNameField.getText().toString());
+            signIn(mEmailField.getText().toString(), mPasswordField.getText().toString(),
+                    mNameField.getText().toString());
         } else if (i == R.id.textViewSignInForgotPassword) {
             resetPassword();
             new AlertDialog.Builder(MainActivity.this)

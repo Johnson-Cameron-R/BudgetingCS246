@@ -1,5 +1,6 @@
 package byuics246.budgeting;
 
+import android.content.Context;
 import android.util.Log;
 import android.view.View;
 
@@ -93,11 +94,11 @@ public class Conversion {
      * converts an expense category index to an category name
      *
      * @param categoryID
-     * @param view
+     * @param context
      * @return
      */
-    public  String convertExpenseCategoryIDToString(int categoryID, View view){
-        String[] categories = view.getResources().getStringArray(R.array.ExpensesCategories);
+    public  String convertExpenseCategoryIDToString(int categoryID, Context context){
+        String[] categories = context.getResources().getStringArray(R.array.ExpensesCategories);
         return categories[categoryID];
     }
 
@@ -105,11 +106,11 @@ public class Conversion {
      * converts an income category index to an category name
      *
      * @param categoryID
-     * @param view
+     * @param context
      * @return
      */
-    public  String convertIncomeCategoryIDToString(int categoryID, View view){
-        String[] categories = view.getResources().getStringArray(R.array.IncomeCategories);
+    public  String convertIncomeCategoryIDToString(int categoryID, Context context){
+        String[] categories = context.getResources().getStringArray(R.array.IncomeCategories);
         return categories[categoryID];
     }
 

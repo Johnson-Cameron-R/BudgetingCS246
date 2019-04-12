@@ -94,9 +94,12 @@ public class MyWritableWorkbook {
             if (inp.exists()) {
                 out = new File(sdCard.getAbsolutePath() + folder + file_name_out);
                 try {
-                    Workbook existingWorkbook = Workbook.getWorkbook(inp);// This opens up a read-only copy of the workbook
-                    wb = Workbook.createWorkbook(out, existingWorkbook); // This opens up a writable workbook so that we can edit the copy
-                    existingWorkbook.close();    // Important: Close it before writing the copy with copy.write();
+                    // This opens up a read-only copy of the workbook
+                    Workbook existingWorkbook = Workbook.getWorkbook(inp);
+                    // This opens up a writable workbook so that we can edit the copy
+                    wb = Workbook.createWorkbook(out, existingWorkbook);
+                    // Important: Close it before writing the copy with copy.write();
+                    existingWorkbook.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                     Log.d(TAG, "An exception in createCopyWorkbook");
@@ -178,7 +181,8 @@ public class MyWritableWorkbook {
      * @param cellNumberRecords
      * @param cellStringRecords
      */
-    public void updateSheet(int sheetNumber, List<CellRecord <Double>> cellNumberRecords, List<CellRecord <String>> cellStringRecords)
+    public void updateSheet(int sheetNumber, List<CellRecord <Double>> cellNumberRecords,
+                            List<CellRecord <String>> cellStringRecords)
     {
         WritableSheet sheet = wb.getSheet(sheetNumber);
         try {

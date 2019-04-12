@@ -184,7 +184,7 @@
             <com.github.aakira.expandablelayout.ExpandableRelativeLayout
                 android:id="@+id/ShowHistoryExpenseLayout"
                 android:layout_width="match_parent"
-                android:layout_height="309dp"
+                android:layout_height="430dp"
                 android:layout_below="@+id/buttonExpensesHistory"
                 android:layout_marginTop="-12dp"
                 android:padding="8dp"
@@ -195,36 +195,31 @@
                 tools:layout_editor_absoluteX="44dp"
                 tools:layout_editor_absoluteY="0dp">
 
-                <RelativeLayout
-                    android:layout_width="403dp"
-                    android:layout_height="301dp">
+                <LinearLayout android:orientation="vertical"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    xmlns:android="http://schemas.android.com/apk/res/android">
 
-                    <com.baoyz.swipemenulistview.SwipeMenuListView
-                        android:id="@+id/listViewExpensesHistory"
-                        android:layout_width="393dp"
+                    <android.support.v7.widget.RecyclerView
+                        android:layout_height="0dp"
+                        android:layout_width="match_parent"
+                        android:scrollbars="vertical"
+                        android:layout_weight="1"
+                        android:elevation="2dp"
+                        android:layout_margin="5dp"
+                        android:id="@+id/my_recycler_view"/>
+
+                    <TextView
                         android:layout_height="match_parent"
-                        android:layout_alignParentStart="true"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentTop="true"
-                        android:layout_alignParentEnd="true"
-                        android:layout_alignParentRight="true"
-                        android:layout_alignParentBottom="true"
-                        android:layout_marginStart="0dp"
-                        android:layout_marginLeft="0dp"
-                        android:layout_marginTop="0dp"
-                        android:layout_marginEnd="1dp"
-                        android:layout_marginRight="1dp"
-                        android:layout_marginBottom="0dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        android:layout_width="match_parent"
+                        android:id="@+id/empty_view"
+                        android:visibility="gone"
+                        android:text="No Records"
+                        android:gravity="center"/>
 
-                </RelativeLayout>
+                </LinearLayout>
 
             </com.github.aakira.expandablelayout.ExpandableRelativeLayout>
-
-
         </RelativeLayout>
     </FrameLayout>
 

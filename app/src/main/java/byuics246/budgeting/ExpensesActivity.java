@@ -12,20 +12,24 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baoyz.swipemenulistview.SwipeMenu;
 import com.baoyz.swipemenulistview.SwipeMenuCreator;
 import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
+import com.daimajia.swipe.util.Attributes;
 import com.github.aakira.expandablelayout.ExpandableRelativeLayout;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -41,6 +45,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,29 +53,31 @@ import java.util.Map;
  *
  * @author Cody Cornelison and Inessa Carroll
  */
-public class ExpensesActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, NavigationView.OnNavigationItemSelectedListener  {
+public class ExpensesActivity extends AppCompatActivity implements
+        AdapterView.OnItemSelectedListener, NavigationView.OnNavigationItemSelectedListener  {
     private static final String TAG = "Expenses";
 
     ExpandableRelativeLayout expandableRelativeLayout;
 
     //for history listView
-    SwipeMenuListView listView;
-    ArrayList <Transaction> listExpenses;
+    SwipeRecyclerViewAdapter mAdapter;
+    private TextView tvEmptyTextView;
+    private RecyclerView mRecyclerView;
+    ListView listView;
+    ArrayList <Transaction> listTransactions;
     int indexItemToDelete;
     Transaction toDelete;
-    Transaction expenseToAdd;
+    Transaction transactionToAdd;
 
-    //for add new expense
+    //for add new transaction
     private EditText newDate;
     private EditText newAmount;
     private EditText newDescription;
     String category;
 
     //for category spinner
-    boolean hasCategory = false;
     ArrayAdapter <CharSequence> adapterCategories;
     Spinner categoriesSpinner;
-    ThreeColumnsAdapter expensesHistoryAdapter;
 
     //Firebase DB
     private FirebaseFirestore db;
@@ -79,154 +86,30 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     private SharedPreferences loginPreferences;
     private SharedPreferences.Editor loginPrefsEditor;
 
+
+    /**
+     * Activates main functionality and populates the view
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        /** creates the view*/
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expenses);
 
+        /**creates navigation*/
         NavigationView navView = (NavigationView)findViewById(R.id.navigationLayoutExpenses);
         navView.setNavigationItemSelectedListener(this);
 
-        //activate FireStore
+        /**activates FireStore */
         db = FirebaseFirestore.getInstance();
 
-        //activate LoginPrefs
+        /**activates LoginPrefs*/
         loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
         loginPrefsEditor = loginPreferences.edit();
 
-        //activate a history list view
-        listView = (SwipeMenuListView) findViewById(R.id.listViewExpensesHistory);
-        listExpenses = new ArrayList<>();
 
-        //get data from DB and add it to the viewer.
-        db.collection(loginPreferences.getString("email", "") + "/Budget/Expenses")
-                .orderBy("date", Query.Direction.DESCENDING)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        Map<String, Object> expenseData;
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                expenseData = document.getData();
-                                Transaction expense = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString(), expenseData.get("id").toString());
-                                listExpenses.add(expense);
-                            }
-                            expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
-                            listView.setAdapter(expensesHistoryAdapter);
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-
-        //allow for deletion of list items
-        SwipeMenuCreator creator = new SwipeMenuCreator() {
-            @Override
-            public void create(SwipeMenu menu) {
-                // create "delete" item
-                SwipeMenuItem deleteItem = new SwipeMenuItem(
-                        getApplicationContext());
-                // set item background
-                deleteItem.setBackground(new ColorDrawable(Color.rgb(0xF9,
-                        0x3F, 0x25)));
-                // set item width
-                deleteItem.setWidth(170);
-                // set a icon
-                deleteItem.setIcon(R.drawable.ic_delete);
-                // add to menu
-                menu.addMenuItem(deleteItem);
-
-//                // create "open" item
-//                SwipeMenuItem openItem = new SwipeMenuItem(
-//                        getApplicationContext());
-//                // set item background
-//                openItem.setBackground(new ColorDrawable(Color.rgb(0xC9, 0xC9,
-//                        0xCE)));
-//                // set item width
-//                openItem.setWidth(170);
-//                // set item title
-//                openItem.setTitle("Open");
-//                // set item title fontsize
-//                openItem.setTitleSize(18);
-//                // set item title font color
-//                openItem.setTitleColor(Color.WHITE);
-//                // add to menu
-//                menu.addMenuItem(openItem);
-            }
-        };
-        // set creator
-        listView.setMenuCreator(creator);
-
-        listView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
-                indexItemToDelete = position;
-                switch (index) {
-                    case 0:
-                        // delete
-                        toDelete = listExpenses.get(position);
-                        db.collection(loginPreferences.getString("email", "") + "/Budget/Expenses")
-                                .whereEqualTo("id", toDelete.getId())
-                                .orderBy("date", Query.Direction.DESCENDING)
-                                .get()
-                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                        Map<String, Object> expenseData;
-                                        if (task.isSuccessful()) {
-                                            int numOfRecords = 0;
-                                            String docName = "";
-                                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                                numOfRecords++;
-                                                expenseData = document.getData();
-                                                if (numOfRecords <=1) {
-                                                    docName = document.getId();
-                                                    String date = expenseData.get("date").toString();
-                                                }
-                                                else {
-                                                    Log.d(TAG, "Multiple similar records: ");
-                                                    break;
-                                                }
-                                            }
-                                            if (numOfRecords == 1)
-                                            {
-                                                db.collection(loginPreferences.getString("email", "") + "/Budget/Expenses")
-                                                        .document(docName).delete()
-                                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                            @Override
-                                                            public void onSuccess(Void aVoid) {
-                                                                Log.d(TAG, "DocumentSnapshot successfully deleted!");
-                                                                listExpenses.remove(indexItemToDelete);
-                                                                expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
-                                                                listView.setAdapter(expensesHistoryAdapter);
-                                                            }
-                                                        })
-                                                        .addOnFailureListener(new OnFailureListener() {
-                                                            @Override
-                                                            public void onFailure(@NonNull Exception e) {
-                                                                Log.w(TAG, "Error deleting document", e);
-                                                            }
-                                                        });
-                                            }
-                                        } else {
-                                            Log.d(TAG, "Error getting documents: ", task.getException());
-                                        }
-                                    }
-                                })
-
-                        ;
-                        break;
-//                    case 1:
-//                        // open
-//                        break;
-                }
-                // false : close the menu; true : not close the menu
-                return false;
-            }
-        });
-
-        //activate add new expense fields
+        /**activate add new expense fields*/
         newDate = findViewById(R.id.editTextExpensesNewDate);
         newAmount = findViewById(R.id.editTextExpensesNewAmount);
         newDescription = findViewById(R.id.editTextExpensesNEwDescription);
@@ -234,46 +117,139 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
         String today = format1.format(Calendar.getInstance().getTime());
         newDate.setText(today);
 
-        //activate a category spinner
+        /**activate a category spinner*/
         categoriesSpinner = findViewById(R.id.spinnerExpensesNewCategories);
         adapterCategories = ArrayAdapter.createFromResource(this, R.array.ExpensesCategories, android.R.layout.simple_spinner_item);
         adapterCategories.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categoriesSpinner.setAdapter(adapterCategories);
         categoriesSpinner.setOnItemSelectedListener(this);
 
-        //Onclick for Navigation buttons
-        ////Handled by Layout XML
+        /**activate and populate the history listView*/
+        tvEmptyTextView = (TextView) findViewById(R.id.empty_view);
+        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        listTransactions = new ArrayList<>();
+        loadData();
     }
 
 
+    /**
+     * loads data from db to views
+     */
+    public void loadData() {
+
+        /**get data from DB and add it to the viewer*/
+        db.collection(loginPreferences.getString("email", "")
+                + "/Budget/"+TAG)
+                .orderBy("date", Query.Direction.DESCENDING)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        Map<String, Object> transactionData;
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                transactionData = document.getData();
+                                Transaction transaction = new Transaction(transactionData.get("date")
+                                        .toString(), transactionData.get("user").toString(), transactionData
+                                        .get("category").toString(),transactionData.get("amount")
+                                        .toString(), transactionData.get("description").toString(),
+                                        transactionData.get("id").toString());
+                                listTransactions.add(transaction);
+                            }
+                            if(listTransactions.isEmpty()){
+                                mRecyclerView.setVisibility(View.GONE);
+                                tvEmptyTextView.setVisibility(View.VISIBLE);
+                            }else{
+                                mRecyclerView.setVisibility(View.VISIBLE);
+                                tvEmptyTextView.setVisibility(View.GONE);
+                            }
+
+                            mAdapter = new SwipeRecyclerViewAdapter(ExpensesActivity.this, listTransactions);
+
+                            ((SwipeRecyclerViewAdapter) mAdapter).setMode(Attributes.Mode.Single);
+
+                            mRecyclerView.setAdapter(mAdapter);
+
+                            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                                @Override
+                                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                                    super.onScrollStateChanged(recyclerView, newState);
+                                    Log.e("RecyclerView", "onScrollStateChanged");
+                                }
+                                @Override
+                                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                                    super.onScrolled(recyclerView, dx, dy);
+                                }
+                            });
+
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+    }
+
+
+
+
+    /**
+     * closes or opens the expandable window for adding expenses
+     * @param view
+     */
     public void openAddNewExpenseWindow(View view) {
         expandableRelativeLayout = (ExpandableRelativeLayout) findViewById(R.id.AddNewExpenseLayout);
         expandableRelativeLayout.toggle();
     }
 
+    /** closes or opens the expandable window for viewing history*/
     public void showHistory(View view) {
         expandableRelativeLayout = (ExpandableRelativeLayout) findViewById(R.id.ShowHistoryExpenseLayout);
         expandableRelativeLayout.toggle();
     }
 
+
+    /**adds an transaction to the history list and db*/
     public void addToList(View view) {
 
         if (validateForm()) {
 //            additionCompleted = false;
             String dateToAdd = new Conversion().reformatDateForDB(newDate.getText().toString());
-            expenseToAdd = new Transaction(dateToAdd, loginPreferences.getString("name", ""), String.valueOf(new Conversion().ConvertCategory(category, getResources().getStringArray(R.array.ExpensesCategories))), newAmount.getText().toString(),newDescription.getText().toString(), "tempString");
-            db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Expenses")
-                    .add(expenseToAdd)
+            transactionToAdd = new Transaction(dateToAdd, loginPreferences.getString("name", ""), String.valueOf(new Conversion().ConvertCategory(category, getResources().getStringArray(R.array.ExpensesCategories))), newAmount.getText().toString(),newDescription.getText().toString(), "tempString");
+            db.collection(loginPreferences.getString("email", "")).document("Budget").collection(TAG)
+                    .add(transactionToAdd)
                     .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                         @Override
                         public void onSuccess(DocumentReference documentReference) {
-                            expenseToAdd.setId(documentReference.getId());
-                            Log.d(TAG, "onSuccess: ID = " + expenseToAdd.getId());
-                            db.collection(loginPreferences.getString("email", "")).document("Budget").collection("Expenses").document(documentReference.getId())
-                                    .set(expenseToAdd);
-                            listExpenses.add(expenseToAdd);
-                            expensesHistoryAdapter = new ThreeColumnsAdapter(ExpensesActivity.this, R.layout.three_columns_history_layout, listExpenses);
-                            listView.setAdapter(expensesHistoryAdapter);
+                            transactionToAdd.setId(documentReference.getId());
+                            Log.d(TAG, "onSuccess: ID = " + transactionToAdd.getId());
+                            db.collection(loginPreferences.getString("email", "")).document("Budget").collection(TAG).document(documentReference.getId())
+                                    .set(transactionToAdd);
+                            listTransactions.add(transactionToAdd);
+                            if(listTransactions.isEmpty()){
+                                mRecyclerView.setVisibility(View.GONE);
+                                tvEmptyTextView.setVisibility(View.VISIBLE);
+                            }else{
+                                mRecyclerView.setVisibility(View.VISIBLE);
+                                tvEmptyTextView.setVisibility(View.GONE);
+                            }
+                            mAdapter = new SwipeRecyclerViewAdapter(ExpensesActivity.this, listTransactions);
+
+                            ((SwipeRecyclerViewAdapter) mAdapter).setMode(Attributes.Mode.Single);
+
+                            mRecyclerView.setAdapter(mAdapter);
+
+                            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                                @Override
+                                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                                    super.onScrollStateChanged(recyclerView, newState);
+                                    Log.e("RecyclerView", "onScrollStateChanged");
+                                }
+                                @Override
+                                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                                    super.onScrolled(recyclerView, dx, dy);
+                                }
+                            });
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -282,72 +258,89 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
                             Log.d(TAG, "Error writing documents: ", e);
                         }
                     });
-            Toast.makeText(this, "The expense has been added" ,
+            Toast.makeText(this, "The transaction has been added" ,
                     Toast.LENGTH_LONG).show();
         }
     }
 
-    //***********************************************************************************
-    //Spinner functions
-    //***********************************************************************************
+    /**
+     * handles a cetegoty spinner if an item is selected
+     *
+     * @param parent
+     * @param view
+     * @param position
+     * @param id
+     */
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         category = parent.getItemAtPosition(position).toString();
-        if (category.equals("Category")) {
-            hasCategory = false;
-            Log.d(TAG, "onItemSelected: hasCategory is False");
-        }
-        else {
-            hasCategory = true;
-            Log.d(TAG, "onItemSelected: hasCategory is True");
-        }
     }
 
+
+    /**
+     * handles a category spinner if an item isn't selected
+     *
+     * @param parent
+     */
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-        hasCategory = false;
         Log.d(TAG, "onNothingSelected: HasCategory is False");
     }
 
-    //***********************************************************************************
-    //Functions
-    //***********************************************************************************
 
+    /**
+     * validates the data provided for creating a new transaction
+     * @return
+     */
     private boolean validateForm() {
         boolean valid = true;
-
-        //Check if Amount is empty
+        String date = newDate.getText().toString();
         String amount = newAmount.getText().toString();
-        if (TextUtils.isEmpty(amount)) {
-            newAmount.setError("Required.");
-            valid = false;
-        } else {
-            newAmount.setError(null);
-        }
 
-        //Check if Category is empty
-        if (!hasCategory) {
+        String errorName = "";
+        String errorText = "";
+        int validationCode = new Utilities().validateNewTransaction(date, category, amount);
+        switch (validationCode){
+            case 1:
+                valid = false;
+                errorName = "Wrong month number";
+                errorText = "Month must be less than 12";
+                break;
+            case 2:
+                valid = false;
+                errorName = "Wrong day number";
+                errorText = "This day doesn't exist in the chosen month";
+                break;
+            case 3:
+                valid = false;
+                newAmount.setError("Required.");
+                break;
+            case 4:
+                valid = false;
+                errorName = "Category required";
+                errorText = "Please choose a category from the list.";
+                break;
+            default:
+                break;
+        }
+        if (!errorName.equals("")){
             new AlertDialog.Builder(ExpensesActivity.this)
-                    .setTitle("Category Required")
-                    .setMessage("Please choose a category from the list.")
+                    .setTitle(errorName)
+                    .setMessage(errorText)
                     .setPositiveButton("Close", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                         }
                     }).setNegativeButton("", null).show();
-            valid = false;
-        } else {
         }
-
         return valid;
     }
 
-    private String generateCurrency(Double number) {
-        NumberFormat format = NumberFormat.getCurrencyInstance();
-        return format.format(number);
-    }
 
 
+    /**
+     * close navigation if clicked outside of it
+     */
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawerLayoutExpenses);
@@ -359,7 +352,11 @@ public class ExpensesActivity extends AppCompatActivity implements AdapterView.O
     }
 
 
-
+    /**
+     * handles navigation buttons to direct the user to different pages
+     * @param item
+     * @return
+     */
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {

@@ -1,16 +1,16 @@
 package byuics246.budgeting;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 /**
  * represents both income and expense transactions with getters and setters
  *
  * @author Inessa Carroll
  */
-public class Transaction {
-    String date;/////
+import java.io.Serializable;
+
+public class Transaction implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    String date;
     String user;
     String description;
     String category;

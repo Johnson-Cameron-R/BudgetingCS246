@@ -90,7 +90,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                                     .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
-                                            Intent openSignInActivity = new Intent(getApplicationContext(), MainActivity.class);
+                                            Intent openSignInActivity = new Intent(
+                                                    getApplicationContext(), MainActivity.class);
                                             startActivity(openSignInActivity);
                                         }
                                     }).setNegativeButton("", null).show();
@@ -104,7 +105,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             saveLoginInfo(email, password);
-                                            Intent openSignInActivity = new Intent(getApplicationContext(), MainActivity.class);
+                                            Intent openSignInActivity = new Intent(
+                                                    getApplicationContext(), MainActivity.class);
                                             startActivity(openSignInActivity);
                                         }
                                     }).setNegativeButton("No", null).show();
@@ -132,7 +134,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
-    // function from https://stackoverflow.com/questions/6119722/how-to-check-edittexts-text-is-email-address-or-not
+    // function from https://stackoverflow.com/questions/6119722/
+    //  how-to-check-edittexts-text-is-email-address-or-not
     private boolean isEmailValid(CharSequence email) {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email)
                 .matches();
