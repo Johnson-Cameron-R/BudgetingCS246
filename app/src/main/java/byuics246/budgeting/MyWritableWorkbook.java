@@ -24,7 +24,11 @@ import jxl.write.Number;
 
 import android.util.Log;
 
-
+/**
+ * represents an excel file workbook class
+ *
+ * @author Inessa Carroll
+ */
 public class MyWritableWorkbook {
     private static final String TAG = "Writable book";
     String folder;
@@ -36,24 +40,35 @@ public class MyWritableWorkbook {
     public WritableWorkbook wb;
     File sdCard = Environment.getExternalStorageDirectory();
 
+    /**
+     * none default constructor
+     * @param workbook
+     */
+    public MyWritableWorkbook(WritableWorkbook workbook){wb = workbook;}
 
-//    FileOutputStream fos = null;//???
+    /**
+     * default constructot
+     */
+    public MyWritableWorkbook(){}
 
-    public MyWritableWorkbook(WritableWorkbook workbook){wb = workbook;}//
-    public MyWritableWorkbook(){}//
 
-
+    /**
+     * tries to create an external directory and gives error codes
+     * @param folder
+     * @return
+     */
     public int checkDirectory(String folder) {
         this.folder = folder;
         //Finding a directory
         File sdCard = Environment.getExternalStorageDirectory();
-//        check permission//////////////////////////////////////////////////////////
+//        check permission
         boolean writable = isExternalStorageWritable();
         if (!writable)
-            return 2;/////////////////////////////////// add an error message of permission
+            return 2;
         directory = new File(sdCard.getAbsolutePath() + folder);
-        //create directory if not exist
+        /**checks if directory exists */
         if (!directory.isDirectory()) {
+            /**creates directory*/
             directory.mkdirs();
         }
         if (!directory.isDirectory()) {
@@ -63,8 +78,12 @@ public class MyWritableWorkbook {
     }
 
 
-    //String inp, String out){file_name_inp = inp; file_name_out = out;
-
+    /**
+     * creates a copy of a workbook since just editing doesn't work
+     * @param templete
+     * @param copy
+     * @return
+     */
     public int createCopyWorkbook (String templete, String copy)
     {
         file_name_inp = templete;
@@ -104,7 +123,11 @@ public class MyWritableWorkbook {
     }
 
 
-
+    /**
+     * creates a new workbook
+     * @param fileName
+     * @return
+     */
     public WritableWorkbook createWorkbook(String fileName){
         //Creating a file
         File file = new File(directory, fileName);
@@ -118,28 +141,13 @@ public class MyWritableWorkbook {
             e.printStackTrace();
         }
         wb = workbook;
-        //////////////////////////////////////////////////////////////////////////////////////try 3
-//        if(isExternalStorageWritable()){
-//            File txt = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),"test.txt");
-////            File dir = getPublicAlbumStorageDir("DIRECTORY_EXCEL");
-////            File txt = new File(dir, fileName);
-//            if (txt.exists()){
-//                Log.i(TAG, "createWorkbook: file created");
-//            }
-//            else
-//            {
-//                Log.i(TAG, "createWorkbook: file Not created");
-//            }
-//
-//        }
-
-//        return this;
         return workbook;
     }
 
 
 
     /**
+     *create a new sheet
      *
      * @param sheetName - name to be given to new sheet
      * @param sheetIndex - position in sheet tabs at bottom of workbook
@@ -163,15 +171,22 @@ public class MyWritableWorkbook {
         return ws;
     }
 
-    public void updateSheet(int sheetNumber, List<CellNumberRecord> cellNumberRecords, List<CellStringRecord> cellStringRecords)
+    /**
+     * Updates a sheet with passed lists of cell recors
+     *
+     * @param sheetNumber
+     * @param cellNumberRecords
+     * @param cellStringRecords
+     */
+    public void updateSheet(int sheetNumber, List<CellRecord <Double>> cellNumberRecords, List<CellRecord <String>> cellStringRecords)
     {
         WritableSheet sheet = wb.getSheet(sheetNumber);
         try {
-            for (CellNumberRecord cr : cellNumberRecords) {
+            for (CellRecord <Double> cr : cellNumberRecords) {
                 Number number = new Number(cr.getColumn(), cr.getRow(),cr.getValue());
                 sheet.addCell(number);
             }
-            for (CellStringRecord cr : cellStringRecords) {
+            for (CellRecord <String> cr : cellStringRecords) {
                 Label label = new Label(cr.getColumn(), cr.getRow(),cr.getValue());
                 sheet.addCell(label);
             }
@@ -183,6 +198,9 @@ public class MyWritableWorkbook {
         }
     }
 
+    /**
+     * close the workbook
+     */
     public void close(){
         try {
             wb.close();
@@ -195,6 +213,7 @@ public class MyWritableWorkbook {
 
 
     /**
+     *write a signle cell of a workbook
      *
      * @param columnPosition - column to place new cell in
      * @param rowPosition - row to place new cell in
@@ -223,7 +242,10 @@ public class MyWritableWorkbook {
 
     }
 
-
+    /**
+     * checks if external storage is writable
+     * @return
+     */
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
@@ -232,7 +254,11 @@ public class MyWritableWorkbook {
         return false;
     }
 
-    /* Checks if external storage is available to at least read */
+    /**
+     * checks if external storage is readable
+     *
+     * @return
+     */
     public boolean isExternalStorageReadable() {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state) ||
@@ -242,6 +268,11 @@ public class MyWritableWorkbook {
         return false;
     }
 
+    /**
+     * Gets the public storage directory
+     * @param albumName
+     * @return
+     */
     public File getPublicAlbumStorageDir(String albumName) {
         // Get the directory for the user's public pictures directory.
         File root = Environment.getExternalStorageDirectory();

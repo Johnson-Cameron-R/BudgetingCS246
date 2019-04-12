@@ -38,50 +38,72 @@ import java.util.List;
 import java.util.Map;
 
 
+/**
+ * Filles in the report activity and deals with its functionality
+ *
+ * @author Inessa Carroll
+ */
 public class ReportsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, NavigationView.OnNavigationItemSelectedListener {
-    MyWritableWorkbook wb;
-
-    private FirebaseFirestore db;
-    private SharedPreferences loginPreferences;
-    private SharedPreferences.Editor loginPrefsEditor;
-
-
     private static final String TAG = "ReportsActivity";
-    int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE;
 
-    String folder = "/Simple_Budgeting_files/";
-    String file_name_inp = "Don't Change.xls";
-    String file_name_out = "Month.xls";
-
-    String month;
-    String monthNumberString;
-    String year;
-
+    /** variables for spinners */
     ArrayAdapter <CharSequence> adapterMonths;
     Spinner monthsSpinner;
     ArrayAdapter <CharSequence> adapterYears;
     Spinner yearsSpinner;
 
+    /** variables for firebase */
+    private FirebaseFirestore db;
+    private SharedPreferences loginPreferences;
+    private SharedPreferences.Editor loginPrefsEditor;
 
+
+    /** an integer for a permission status */
+    int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE;
+
+    /** A workbook object instance */
+    MyWritableWorkbook wb;
+
+    /** file path and names */
+    String folder = "/Simple_Budgeting_files/";
+    String file_name_inp = "Don't Change.xls";
+    String file_name_out = "Month.xls";
+
+    /** variables for a month and a year of the report */
+    String month;
+    String monthNumberString;
+    String year;
+
+    /** cell coordinates in the Excel report for different budget data */
     int startIncomesCategoriesCellY = 18 - 1;
     int startExpensesCategoriesCellY = 33 - 1;
     int startExpensesIncomesCategoriesCellX = 0 - 1; // names of goals
     int startExpensesIncomesGoalsCellX = 1 - 1; // amount of goals
     int startExpensesIncomesCellsX = 4 - 1;
+
+    /** lists of budget data */
     List <Goal> incomesGoals = new ArrayList<>();
     List <Goal> expensesGoals = new ArrayList<>();
     List <Transaction> expenses = new ArrayList<>();
     List <Transaction> incomes = new ArrayList<>();
-    List <CellNumberRecord> cellNumberRecords = new ArrayList<>();
+    List <CellRecord <Double>> cellNumberRecords = new ArrayList<>();
 
+    /**
+     * Creates a view and initializes variables
+     *
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        /** populate the view */
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reports);
 
+        /** activate navigation */
         NavigationView navView = (NavigationView)findViewById(R.id.navigationLayoutReports);
         navView.setNavigationItemSelectedListener(this);
 
+        /** activate spinners */
         monthsSpinner = findViewById(R.id.spinnerReportsMonths);
         adapterMonths = ArrayAdapter.createFromResource(this, R.array.Months, android.R.layout.simple_spinner_item);
         adapterMonths.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -94,49 +116,65 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         yearsSpinner.setAdapter(adapterYears);
         yearsSpinner.setOnItemSelectedListener(this);
 
+        /** activate database */
         db = FirebaseFirestore.getInstance();
 
-        //activate LoginPrefs
+        /** activate shared prefferences */
         loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
         loginPrefsEditor = loginPreferences.edit();
     }
 
+    /**
+     * Leads the reports creation process
+     * <p>
+     *  Activated by clicking "Request a Report" button
+     *  </p>
+     *
+     * @param view
+     */
     public void requestReport(View view){
-        // Pull data from web elements
+        /** create the right report file name*/
         file_name_out = month + year + ".xls";
-        int monthNumber = new Conversion().convertMonthToInt(month, getResources().getStringArray(R.array.Months));
 
+        /** check if month number is acceptable */
+        int monthNumber = new Conversion().convertMonthToInt(month, getResources().getStringArray(R.array.Months));
         if (monthNumber != 0) {
+            /** check if memory writing permission is granted if not - request*/
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED){
+                //memory writing permission hasn't been granted granted - request
                 Toast.makeText(this, "Make sure you add a writing memory permission to the app and try again.",
                         Toast.LENGTH_LONG).show();
                 requestPermission();
             } else {
-                //create a directory
-                MyWritableWorkbook mywb = new MyWritableWorkbook();
-                int directoryStatus = mywb.checkDirectory(folder); // handle error messages // permissions
+                /** check if app directory has been created*/
+                wb = new MyWritableWorkbook();
+                int directoryStatus = wb.checkDirectory(folder);
                 if (directoryStatus != 0) {
-                    Toast.makeText(this, "Make sure you add a writing memory permission to the app and try again",
+                    //directory hasn't been created
+                    Toast.makeText(this, "An error in creating a directory. Try again later",
                             Toast.LENGTH_LONG).show();
                 } else {
-                    // download templete
+                    /** call the download the report templete function and check success*/
                     if (downloadTemplete()) {
-                        // create a copy of the templete
-                        int creationResult = mywb.createCopyWorkbook(file_name_inp, file_name_out);
+                        /** copy the templete*/
+                        int creationResult = wb.createCopyWorkbook(file_name_inp, file_name_out);
                         if (creationResult == 1) {
+                            // error creating a copy
                             Toast.makeText(this, "Make sure that excel reports in the app folder are closed and try again",
                                     Toast.LENGTH_LONG).show();
                         } else if (creationResult == 2) {
+                            //error accessing the templete
                             Toast.makeText(this, "The templete is having issues downloading. Try again later",
                                     Toast.LENGTH_LONG).show();
                         } else {
-                            // fill in the report
-                            populateWorkbook(mywb, monthNumber);
+                            /** call pupulateWorkbook function*/
+                            populateWorkbook(monthNumber);
                         }
                     }
                     else{
+                        //error downloading the templete
                         Toast.makeText(this, "Templete hasn't been properly downloaded. Check internet connection and try again" ,
                                 Toast.LENGTH_LONG).show();
                     }
@@ -145,12 +183,13 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         }
     }
 
-    private void populateWorkbook(MyWritableWorkbook mywb, int monthNumber) {
-        wb = mywb;
-        monthNumberString = "";
-        if (monthNumber < 10)
-            monthNumberString+="0";
-        monthNumberString+=String.valueOf(monthNumber);
+    /**
+     * Creates cell records according to busget data for the selected month and populates the report
+     *
+     * @param monthNumber
+     */
+    private void populateWorkbook(int monthNumber) {
+        monthNumberString = new Conversion().convertMonthIntToNumberString(monthNumber);
 
         //Pull amount goals categories and values
 //        incomesGoals.add(new Goal("Navex", "500", "1"));
@@ -161,7 +200,7 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
 //        expensesGoals.add(new Goal("Inactive Savings", "700", "1"));
 //        expensesGoals.add(new Goal("Education", "800", "2"));
 
-        //Pull incomes of the asked month and year
+        /** Pull incomes of the asked month and year */
         db.collection(loginPreferences.getString("email", "") + "/Budget/Income")
                 .whereGreaterThanOrEqualTo("date", year + "-" + monthNumberString + "-01")
                 .whereLessThan("date", year + "-" + monthNumberString + "-31")
@@ -181,7 +220,10 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
 //                            {
 //                                b.setCategory(String.valueOf(new Conversion().ConvertCategory(b.getCategory(), getResources().getStringArray(R.array.IncomeCategories))));
 //                            }
-                            cellNumberRecords.addAll(getRecords(incomes, startExpensesIncomesCellsX, startIncomesCategoriesCellY));
+                            /** add all incomes to cell numertic records*/
+                            cellNumberRecords.addAll(getTransactionRecords(incomes, startExpensesIncomesCellsX, startIncomesCategoriesCellY));
+
+                            /** Pull expenses of the asked month and year */
                             db.collection(loginPreferences.getString("email", "") + "/Budget/Expenses")
                                     .whereGreaterThanOrEqualTo("date", year + "-" + monthNumberString + "-01")
                                     .whereLessThan("date", year + "-" + monthNumberString + "-31")
@@ -196,20 +238,22 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
                                                     Transaction expense = new Transaction(expenseData.get("date").toString(), expenseData.get("user").toString(), expenseData.get("category").toString(), expenseData.get("amount").toString(), expenseData.get("description").toString(), expenseData.get("id").toString());
                                                     expenses.add(expense);
                                                 }
-                                                cellNumberRecords.addAll(getRecords(expenses, startExpensesIncomesCellsX, startExpensesCategoriesCellY));
-                                                cellNumberRecords.addAll(getGoalRecordsNumber(expensesGoals, startExpensesIncomesGoalsCellX, startExpensesCategoriesCellY));
-                                                cellNumberRecords.addAll(getGoalRecordsNumber(incomesGoals, startExpensesIncomesGoalsCellX, startIncomesCategoriesCellY));
+                                                /** add all incomes to cell numertic records*/
+                                                cellNumberRecords.addAll(getTransactionRecords(expenses, startExpensesIncomesCellsX, startExpensesCategoriesCellY));
+//                                                cellNumberRecords.addAll(getGoalRecordsNumber(expensesGoals, startExpensesIncomesGoalsCellX, startExpensesCategoriesCellY));
+//                                                cellNumberRecords.addAll(getGoalRecordsNumber(incomesGoals, startExpensesIncomesGoalsCellX, startIncomesCategoriesCellY));
 
-                                                List <CellStringRecord> cellStringRecords = new ArrayList<>();
-                                                cellStringRecords.addAll(getGoalRecordsString(expensesGoals, startExpensesIncomesCategoriesCellX, startExpensesCategoriesCellY));
-                                                cellStringRecords.addAll(getGoalRecordsString(incomesGoals, startExpensesIncomesCategoriesCellX, startIncomesCategoriesCellY));
+                                                List <CellRecord <String>> cellStringRecords = new ArrayList<>();
+//                                                cellStringRecords.addAll(getGoalRecordsString(expensesGoals, startExpensesIncomesCategoriesCellX, startExpensesCategoriesCellY));
+//                                                cellStringRecords.addAll(getGoalRecordsString(incomesGoals, startExpensesIncomesCategoriesCellX, startIncomesCategoriesCellY));
 
-                                                //Update excel
+                                                /** write all cell records in the excel, close it and show a success message*/
                                                 wb.updateSheet(0, cellNumberRecords, cellStringRecords);
                                                 wb.close();
                                                 Toast.makeText(getBaseContext(), "File is saved in  internal storage/Simple_Budgeting_files/" + file_name_out + "!",
                                                         Toast.LENGTH_LONG).show();
                                             } else {
+                                                // reading expenses failed
                                                 Log.d(TAG, "Error getting documents: ", task.getException());
                                             }
                                         }
@@ -217,6 +261,7 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
 
 
                         } else {
+                            //reading incomes failed
                             Log.d(TAG, "Error getting documents: ", task.getException());
                         }
                     }
@@ -224,14 +269,18 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
     }
 
 
-    //**********************************
-    //*
-    //**********************************
+    /**
+     * Downloads the report templete if it isn't downloaded yet
+     *
+     * @return success of downloading
+     */
     public boolean downloadTemplete()
     {
         File sdCard = Environment.getExternalStorageDirectory();
         File file = new File(sdCard.getAbsolutePath() + folder +file_name_inp);
+        /** check if the file with the templete name already exist in the app directory*/
         if(!file.exists()) {
+            /** download the templete*/
             try {
                 DownloadManager.Request request = new DownloadManager.Request(Uri.parse("https://github.com/inessae/Excel-report-tamplete/raw/master/Tamplete.xls"))
                     .setTitle(file_name_inp)// Title of the Download Notification
@@ -253,27 +302,49 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         return true;
     }
 
-
+    /**
+     * Processes an option chosen from spinners
+     *
+     * @param parent
+     * @param view
+     * @param position
+     * @param id
+     */
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         switch(parent.getId()) {
             case R.id.spinnerReportsMonths:
+                /** for the month spinner*/
                 month = parent.getItemAtPosition(position).toString();
                 break;
             case R.id.spinnerReportsYears:
+                /** for the year spinner*/
                 year = parent.getItemAtPosition(position).toString();
                 break;
         }
     }
 
+    /**
+     * Processes spinners if no spinner option is selected
+     *
+     * @param parent
+     */
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
 
-    private List <CellNumberRecord> getRecords(List <Transaction> transactions, int startCellsX, int startCellsY)
+    /**
+     * based on date and category of a transaction, creates a record with the cell coordinates and amount
+     *
+     * @param transactions
+     * @param startCellsX
+     * @param startCellsY
+     * @return
+     */
+    private List <CellRecord <Double>> getTransactionRecords(List <Transaction> transactions, int startCellsX, int startCellsY)
     {
-        List <CellNumberRecord> cellNumberRecords = new ArrayList<>();
+        List <CellRecord <Double>> cellNumberRecords = new ArrayList<>();
         for (Transaction ex : transactions) {
             try {
                 Date date=new SimpleDateFormat("yyyy-MM-dd").parse(ex.date);
@@ -282,8 +353,7 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
                 double amount = Double.parseDouble(ex.getAmount());
                 // if there is a record for the same day for the same category, update its value to its original value + amount
                 boolean found = false;
-                CellNumberRecord crMatching = null;
-                for (CellNumberRecord cr : cellNumberRecords){
+                for (CellRecord <Double> cr : cellNumberRecords){
                     if (cr.getColumn() == day + startCellsX && cr.getRow() == category + startCellsY){
                         found = true;
                         cr.setValue(amount + cr.getValue());
@@ -292,7 +362,7 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
                 }
                 //if there are no records for the same day for the same category create a new record
                 if (!found) {
-                    CellNumberRecord cellNumberRecord = new CellNumberRecord(day + startCellsX, category + startCellsY, amount);
+                    CellRecord < Double> cellNumberRecord = new CellRecord < Double>(day + startCellsX, category + startCellsY, amount);
                     cellNumberRecords.add(cellNumberRecord);
                 }
             } catch (ParseException e) {
@@ -302,31 +372,47 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
         return cellNumberRecords;
     }
 
-
-    private List <CellStringRecord> getGoalRecordsString(List <Goal> goals, int startCellsX, int startCellsY)
+    /**
+     * creates a cell string record of a list of goals
+     * @param goals
+     * @param startCellsX
+     * @param startCellsY
+     * @return
+     */
+    private List <CellRecord <String>> getGoalRecordsString(List <Goal> goals, int startCellsX, int startCellsY)
     {
-        List <CellStringRecord> cellStringRecords = new ArrayList<>();
+        List <CellRecord <String>> cellStringRecords = new ArrayList<>();
         for (Goal g : goals) {
             String value = g.getName();
             int id = Integer.parseInt(g.getId());
-            CellStringRecord cellStringRecord = new CellStringRecord(startCellsX + 1, id + startCellsY, value);
+            CellRecord <String> cellStringRecord = new CellRecord<String>(startCellsX + 1, id + startCellsY, value);
             cellStringRecords.add(cellStringRecord);
 
         }
         return cellStringRecords;
     }
 
-    private List <CellNumberRecord> getGoalRecordsNumber(List <Goal> goals, int startCellsX, int startCellsY) {
-        List<CellNumberRecord> cellNumberRecords = new ArrayList<>();
+    /**
+     * created a list of number records of goals
+     * @param goals
+     * @param startCellsX
+     * @param startCellsY
+     * @return
+     */
+    private List <CellRecord <Double>> getGoalRecordsNumber(List <Goal> goals, int startCellsX, int startCellsY) {
+        List<CellRecord <Double>> cellNumberRecords = new ArrayList<>();
         for (Goal g : goals) {
             Double value = Double.parseDouble(g.getAmount());
             int id = Integer.parseInt(g.getId());
-            CellNumberRecord cellNumberRecord = new CellNumberRecord(startCellsX + 1, id + startCellsY, value);
+            CellRecord <Double> cellNumberRecord = new CellRecord <Double>(startCellsX + 1, id + startCellsY, value);
             cellNumberRecords.add(cellNumberRecord);
         }
         return cellNumberRecords;
     }
 
+    /**
+     * requests memory permission from the user
+     */
     public void requestPermission(){
         //request and check permissions
         if (ContextCompat.checkSelfPermission(this,
@@ -353,6 +439,9 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
     }
 
 
+    /**
+     * closes navigation panel if user clicks outside of it
+     */
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawerLayoutReports);
@@ -364,7 +453,11 @@ public class ReportsActivity extends AppCompatActivity implements AdapterView.On
     }
 
 
-
+    /**
+     * navigates to different pages
+     * @param item
+     * @return
+     */
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {

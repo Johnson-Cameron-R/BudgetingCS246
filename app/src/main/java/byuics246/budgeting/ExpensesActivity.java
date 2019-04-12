@@ -43,7 +43,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
 
-//AdapterView.OnItemSelectedListener
+/**
+ * Handles all activities on the Expence page
+ *
+ * @author Cody Cornelison and Inessa Carroll
+ */
 public class ExpensesActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, NavigationView.OnNavigationItemSelectedListener  {
     private static final String TAG = "Expenses";
 

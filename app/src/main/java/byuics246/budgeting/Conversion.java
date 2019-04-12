@@ -9,11 +9,23 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Contains all types of conversion functions
+ *
+ * @author Inessa Carroll
+ */
 public class Conversion {
     private static final String TAG = "Convertion";
     public Conversion() {}
 
-
+    /**
+     * converts a category string into a category index
+     *
+     * @author Inessa Carroll
+     * @param category
+     * @param categories
+     * @return
+     */
     public int ConvertCategory(String category, String[] categories){
         int categoryInt = 0;
         for (String s : categories){
@@ -26,6 +38,12 @@ public class Conversion {
      }
 
 
+    /**
+     * chenges the date format to yyyy-MM-dd
+     *
+     * @param oldFormat
+     * @return
+     */
     public String reformatDateForDB(String oldFormat){
         String newDate = "";
         try {
@@ -40,7 +58,12 @@ public class Conversion {
         return newDate;
     }
 
-
+    /**
+     * converts string month into a number it represents
+     * @param month
+     * @param months
+     * @return
+     */
     public int convertMonthToInt(String month, String[] months){
         int monthInt = 1;
         for (String s : months){
@@ -51,11 +74,40 @@ public class Conversion {
         Log.d(TAG, "Wrong month value");
         return monthInt;
     }
+
+    /**
+     * converts a number of the month from the int to string format
+     *
+     * @param monthNumber
+     * @return
+     */
+    public String convertMonthIntToNumberString(int monthNumber) {
+        String monthNumberString = "";
+        if (monthNumber < 10)
+            monthNumberString+="0";
+        monthNumberString+=String.valueOf(monthNumber);
+        return monthNumberString;
+    }
+
+    /**
+     * converts an expense category index to an category name
+     *
+     * @param categoryID
+     * @param view
+     * @return
+     */
     public  String convertExpenseCategoryIDToString(int categoryID, View view){
         String[] categories = view.getResources().getStringArray(R.array.ExpensesCategories);
         return categories[categoryID];
     }
 
+    /**
+     * converts an income category index to an category name
+     *
+     * @param categoryID
+     * @param view
+     * @return
+     */
     public  String convertIncomeCategoryIDToString(int categoryID, View view){
         String[] categories = view.getResources().getStringArray(R.array.IncomeCategories);
         return categories[categoryID];

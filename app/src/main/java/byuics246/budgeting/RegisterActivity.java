@@ -19,6 +19,12 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+
+/**
+ * Handles all activities on the Register page
+ *
+ * @author Cody Cornelison
+ */
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "Register";

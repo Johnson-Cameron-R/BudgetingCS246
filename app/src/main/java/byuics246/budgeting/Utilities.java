@@ -2,8 +2,18 @@ package byuics246.budgeting;
 
 import java.util.Random;
 
+/**
+ * contains supporting fucntions
+ *
+ * @author Inessa Carroll
+ */
 public class Utilities {
     int randomStringLength = 20;
+
+    /**
+     * creates a random string of a set length
+     * @return
+     */
     String randomString() {
         Random r = new Random();
         StringBuilder sb = new StringBuilder();
