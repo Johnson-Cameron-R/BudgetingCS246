@@ -58,6 +58,16 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         mAuth = FirebaseAuth.getInstance();
     }
 
+    /**
+     * Begins create account process for a new user
+     * <p>
+     *     This function accepts the user credentials as parameters. Upon success, a verification
+     *     email will be sent to the user's desired email address. They will then be redirected
+     *     to the login page to set up their account.
+     * </p>
+     * @param email String for the user email to be logged in with
+     * @param password String for the user password to be logged in with
+     */
     private void createAccount(final String email, final String password) {
         Log.d(TAG, "createAccount:" + email);
         if (!validateForm()) {
@@ -118,6 +128,16 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         // [END create_user_with_email]
     }
 
+    /**
+     * Saves a user's login info locally
+     * <p>
+     *     This function accepts the user credentials as parameters. If the checkbox
+     *     to save user info is checked, it will store user credentials on the device
+     *     so it will then be loaded next time the app is opened.
+     * </p>
+     * @param email String for the user email to be authenticated with
+     * @param password String for the user password to be authenticated with
+     */
     private void saveLoginInfo(String email, String password) {
             loginPrefsEditor.clear();
             loginPrefsEditor.putBoolean("saveLogin", true);
@@ -126,6 +146,14 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             loginPrefsEditor.commit();
     }
 
+    /**
+     * Actions for onClick
+     * <p>
+     *     Similar to the onclicklistener function in main. Watches for the submit button
+     *     to be pressed within the register page to complete the process.
+     * </p>
+     * @param v view name associated with call
+     */
     @Override
     public void onClick(View v) {
         int i = v.getId();
@@ -150,6 +178,14 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 //        return user;
 //    }
 
+    /**
+     * Form validation for register page
+     * <p>
+     *     Checks if the registration fields are empty, passwords match, passwords
+     *     are long enough, and that the email is valid.
+     * </p>
+     * @return returns the boolean valid to signify if input is valid or invalid
+     */
     private boolean validateForm() {
         boolean valid = true;
 
