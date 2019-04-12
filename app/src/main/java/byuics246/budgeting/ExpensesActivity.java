@@ -25,10 +25,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baoyz.swipemenulistview.SwipeMenu;
-import com.baoyz.swipemenulistview.SwipeMenuCreator;
-import com.baoyz.swipemenulistview.SwipeMenuItem;
-import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.daimajia.swipe.util.Attributes;
 import com.github.aakira.expandablelayout.ExpandableRelativeLayout;
 import com.google.android.gms.tasks.OnCompleteListener;
