@@ -368,7 +368,7 @@ public class ReportsActivity extends AppCompatActivity implements
             /** download the templete*/
             try {
                 DownloadManager.Request request = new DownloadManager.Request(Uri.parse(
-                        "https://github.com/inessae/Excel-report-tamplete/raw/master/Tamplete.xls"))
+                        "https://github.com/inessae/Excel-report-tamplete/raw/master/TampleteNew.xls"))
                     .setTitle(file_name_inp)// Title of the Download Notification
                     .setDescription("Downloading")// Description of the Download Notification
                         // Visibility of the download Notification

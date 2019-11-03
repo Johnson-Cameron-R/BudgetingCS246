@@ -8,7 +8,7 @@
         android:allowBackup="true"
         android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="BudgetingCS246"
+        android:label="Our budget"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
@@ -25,7 +25,7 @@
             android:label="BudgetingCS246" />
         <activity
             android:name=".IncomeActivity"
-            android:label="BudgetingCS246" />
+            android:label="Our budget" />
         <activity android:name=".ExpensesActivity" />
         <activity android:name=".ReportsActivity"/>
     </application>

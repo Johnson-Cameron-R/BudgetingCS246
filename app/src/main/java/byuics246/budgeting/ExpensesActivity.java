@@ -37,12 +37,16 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.text.NumberFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+import java.util.TreeMap;
 
 /**
  * Handles all activities on the Expence page
@@ -59,17 +63,18 @@ public class ExpensesActivity extends AppCompatActivity implements
     SwipeRecyclerViewAdapter mAdapter;
     private TextView tvEmptyTextView;
     private RecyclerView mRecyclerView;
-    ListView listView;
     ArrayList <Transaction> listTransactions;
-    int indexItemToDelete;
-    Transaction toDelete;
+    ArrayList <Transaction> opositeOrderTransactions;
     Transaction transactionToAdd;
+    Map <Integer, Double> curSpendingsPerCategory;
+    double amountForCategory;
 
     //for add new transaction
     private EditText newDate;
     private EditText newAmount;
     private EditText newDescription;
     String category;
+    Integer selectedCategoryInt;
 
     //for category spinner
     ArrayAdapter <CharSequence> adapterCategories;
@@ -125,10 +130,52 @@ public class ExpensesActivity extends AppCompatActivity implements
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         listTransactions = new ArrayList<>();
+
         loadData();
     }
 
 
+    public void calculateCurrentSpendingsPerCategory(){
+        //populate spendings per category with zeros
+        curSpendingsPerCategory = new TreeMap<>();
+        int numberOfCategories = 0;
+        String[] allCategories = getResources().getStringArray(R.array.ExpensesCategories);
+        for (String s : allCategories)
+        {
+            curSpendingsPerCategory.put(numberOfCategories, 0.00);
+            numberOfCategories += 1;
+        }
+
+        //calculate the first day of this month
+        Calendar localCalendar = Calendar.getInstance(TimeZone.getDefault());
+        int currentMonth = localCalendar.get(Calendar.MONTH) + 1;
+        int currentYear = localCalendar.get(Calendar.YEAR);
+        GregorianCalendar firstDayThisMonth = new GregorianCalendar(currentYear, currentMonth - 1, 1);
+        Date thisMonth = firstDayThisMonth.getTime();
+
+        //populate spendings per category with actual values
+        for (Transaction transaction : listTransactions)
+        {
+            try {
+                Date date = new SimpleDateFormat("yyyy-MM-dd").parse(transaction.date);
+                int category = Integer.parseInt(transaction.getCategory());
+                double amount = Double.parseDouble(transaction.getAmount());
+                if (!date.before(thisMonth))
+                {
+                    double currentValue = 0;
+                    if (curSpendingsPerCategory.get(category) != null)
+                    {
+                        currentValue = curSpendingsPerCategory.get(category);
+                        curSpendingsPerCategory.remove(category);
+                        curSpendingsPerCategory.put(category, amount + currentValue);
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
     /**
      * loads data from db to views
      */
@@ -160,7 +207,13 @@ public class ExpensesActivity extends AppCompatActivity implements
                                 mRecyclerView.setVisibility(View.VISIBLE);
                                 tvEmptyTextView.setVisibility(View.GONE);
                             }
-
+                            opositeOrderTransactions = new ArrayList<>();
+                            if(listTransactions.size() > 0) {
+                            for (int j = listTransactions.size()-1; j <= 0; j--)
+                            {
+                                opositeOrderTransactions.add(listTransactions.get(j));
+                            }
+                            }
                             mAdapter = new SwipeRecyclerViewAdapter(ExpensesActivity.this, listTransactions);
 
                             ((SwipeRecyclerViewAdapter) mAdapter).setMode(Attributes.Mode.Single);
@@ -184,6 +237,7 @@ public class ExpensesActivity extends AppCompatActivity implements
                         }
                     }
                 });
+
     }
 
 
@@ -211,7 +265,7 @@ public class ExpensesActivity extends AppCompatActivity implements
         if (validateForm()) {
 //            additionCompleted = false;
             String dateToAdd = new Conversion().reformatDateForDB(newDate.getText().toString());
-            transactionToAdd = new Transaction(dateToAdd, loginPreferences.getString("name", ""), String.valueOf(new Conversion().ConvertCategory(category, getResources().getStringArray(R.array.ExpensesCategories))), newAmount.getText().toString(),newDescription.getText().toString(), "tempString");
+            transactionToAdd = new Transaction(dateToAdd, loginPreferences.getString("name", ""), String.valueOf(selectedCategoryInt), newAmount.getText().toString(),newDescription.getText().toString(), "tempString");
             db.collection(loginPreferences.getString("email", "")).document("Budget").collection(TAG)
                     .add(transactionToAdd)
                     .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -254,6 +308,9 @@ public class ExpensesActivity extends AppCompatActivity implements
                             Log.d(TAG, "Error writing documents: ", e);
                         }
                     });
+            amountForCategory = amountForCategory + Double.valueOf(newAmount.getText().toString());
+            TextView textViewExpensesSpentPlanned = (TextView)findViewById(R.id.textViewExpensesSpentPlanned);
+            textViewExpensesSpentPlanned.setText(String.valueOf(amountForCategory));
             Toast.makeText(this, "The transaction has been added" ,
                     Toast.LENGTH_LONG).show();
         }
@@ -270,6 +327,21 @@ public class ExpensesActivity extends AppCompatActivity implements
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         category = parent.getItemAtPosition(position).toString();
+        calculateCurrentSpendingsPerCategory();
+        selectedCategoryInt = new Conversion().ConvertCategory(category, getResources().getStringArray(R.array.ExpensesCategories));
+        amountForCategory = curSpendingsPerCategory.get(selectedCategoryInt);
+        if (position == 0)
+        {
+            for (int i = 0; i < curSpendingsPerCategory.size(); i++)
+            {
+                amountForCategory += curSpendingsPerCategory.get(i);
+            }
+        }
+        TextView textViewExpensesSpent = (TextView)findViewById(R.id.textViewExpensesSpentPlanned);
+        textViewExpensesSpent.setText(String.valueOf(amountForCategory));
+        TextView textViewExpensesPlanned = (TextView)findViewById(R.id.textViewExpensesOutOf);
+        textViewExpensesPlanned.setText(getResources().getStringArray(R.array.ExpensesCategoriesGoals)[selectedCategoryInt]);
+
     }
 
 

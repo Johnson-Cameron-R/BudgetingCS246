@@ -10,6 +10,11 @@
 
     <string-array name="ExpensesCategories">
         <item>Category</item>
+        <item>Food and stuff</item>
+        <item>Gas</item>
+        <item>Eating Out</item>
+        <item>Allowence Thayne</item>
+        <item>Allowence Inessa</item>
         <item>Tithing</item>
         <item>Savings</item>
         <item>Housing</item>
@@ -18,11 +23,29 @@
         <item>Phone</item>
         <item>Netflix</item>
         <item>Amazon Prime</item>
-        <item>Food and stuff</item>
-        <item>Gas</item>
-        <item>Eating Out</item>
-        <item>Extra Thayne</item>
-        <item>Extra Inessa</item>
+        <item>House loan</item>
+        <item>School</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="ExpensesCategoriesGoals">
+        <item>3560</item>
+        <item>450</item>
+        <item>200</item>
+        <item>50</item>
+        <item>150</item>
+        <item>150</item>
+        <item>360</item>
+        <item>1334</item>
+        <item>500</item>
+        <item>80</item>
+        <item>78</item>
+        <item>70</item>
+        <item>12</item>
+        <item>0</item>
+        <item>26</item>
+        <item>0</item>
+        <item>100</item>
     </string-array>
 
     <string-array name="IncomeCategories">

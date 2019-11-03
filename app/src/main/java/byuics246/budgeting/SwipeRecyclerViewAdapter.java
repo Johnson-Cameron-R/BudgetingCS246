@@ -11,7 +11,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,7 +30,7 @@ public class SwipeRecyclerViewAdapter extends RecyclerSwipeAdapter<SwipeRecycler
     private Context mContext;
     String folderName = "";
     private ArrayList<Transaction> transactionsList;
-    Transaction toDelete;
+    public Transaction toDelete;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     //Login preferences
@@ -141,27 +143,36 @@ public class SwipeRecyclerViewAdapter extends RecyclerSwipeAdapter<SwipeRecycler
                 }
 
                 toDelete = transactionsList.get(position);
-                        db.collection(loginPreferences.getString("email", "")
-                                + "/Budget/" + folderName).document(toDelete.getId())
-                                .delete()
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Log.d(TAG, "DocumentSnapshot successfully deleted!");
-                                        mItemManger.removeShownLayouts(viewHolder.swipeLayout);
-                                        transactionsList.remove(position);
-                                        notifyItemRemoved(position);
-                                        notifyItemRangeChanged(position, transactionsList.size());
-                                        mItemManger.closeAllItems();
-                                        Toast.makeText(mContext, "Deleted " + viewHolder.date.getText().toString(), Toast.LENGTH_SHORT).show();
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Log.w(TAG, "Error deleting document", e);
-                                    }
-                                });
+                db.collection(loginPreferences.getString("email", "")
+                        + "/Budget/" + folderName).document(toDelete.getId())
+                        .delete()
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.d(TAG, "DocumentSnapshot successfully deleted!");
+                                mItemManger.removeShownLayouts(viewHolder.swipeLayout);
+                                transactionsList.remove(position);
+                                notifyItemRemoved(position);
+                                notifyItemRangeChanged(position, transactionsList.size());
+                                mItemManger.closeAllItems();
+                                Toast.makeText(mContext, "Deleted " + viewHolder.date.getText().toString(), Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "Error deleting document", e);
+                            }
+                        });
+
+//                String selectedCategory = viewHolder.categoriesSpinner.getSelectedItem().toString();
+//                String categoryToDelete = toDelete.getCategory();
+//                if(selectedCategory == categoryToDelete)
+//                {
+//                    Double amountForCategory = Double.valueOf(viewHolder.currectForCategory.getText().toString());
+//                    Double amountToSet = amountForCategory - Double.valueOf(toDelete.getAmount());
+//                    viewHolder.currectForCategory.setText(String.valueOf(amountToSet));
+//                }
             }
         });
 
@@ -185,11 +196,14 @@ public class SwipeRecyclerViewAdapter extends RecyclerSwipeAdapter<SwipeRecycler
         public TextView amount;
         public TextView description;
         public TextView delete;
+        public TextView currectForCategory;
+        Spinner categoriesSpinner;
 //        public TextView edit;
         public ImageButton btnLocation;
+//        View mView;
         public SimpleViewHolder(View itemView) {
             super(itemView);
-
+//            mView = itemView;
             swipeLayout = (SwipeLayout) itemView.findViewById(R.id.swipe);
             date = (TextView) itemView.findViewById(R.id.dateTextViewExpensesHistory);
             category = (TextView) itemView.findViewById(R.id.categoryTextViewExpensesHistory);
@@ -198,6 +212,8 @@ public class SwipeRecyclerViewAdapter extends RecyclerSwipeAdapter<SwipeRecycler
             delete = (TextView) itemView.findViewById(R.id.Delete);
 //            edit = (TextView) itemView.findViewById(R.id.Edit);
             btnLocation = (ImageButton) itemView.findViewById(R.id.btnLocation);
+//            currectForCategory = (TextView)itemView.findViewById(R.id.textViewExpensesSpentPlanned);
+//            categoriesSpinner = itemView.findViewById(R.id.spinnerExpensesNewCategories);
         }
     }
 }
